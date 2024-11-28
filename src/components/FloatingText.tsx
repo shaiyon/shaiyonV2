@@ -49,7 +49,7 @@ export const FloatingText = () => {
 						height={0.1}
 						curveSegments={12}
 					>
-						software engineer
+						full stack ai engineer
 						<meshStandardMaterial
 							color="black"
 							metalness={0.1}

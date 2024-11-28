@@ -85,7 +85,7 @@ export default function App() {
 						maxDistance={10}
 						// Restrict vertical rotation (in radians)
 						minPolarAngle={Math.PI / 6} // Can't look up more than 45° from horizontal
-						maxPolarAngle={Math.PI / 1.75} // Can't look down below horizontal
+						maxPolarAngle={Math.PI / 1.95} // Can't look down below horizontal
 						mouseButtons={{
 							LEFT: 0, // Rotate
 							MIDDLE: 1, // Zoom

@@ -3,7 +3,7 @@ import { Suspense, useState, useEffect, FC, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { FLOOR_TYPES, type FloorType, loadFloor } from "./floors";
-import type { FloorProps } from "./floors/types";
+import { type FloorProps, defaultFloorProps } from "./floors/types";
 
 import { FloatingText } from "./FloatingText";
 import { SocialLinks } from "./SocialLinks";
@@ -24,11 +24,6 @@ export const Scene: FC = () => {
 		null
 	);
 	const [floorType] = useState<FloorType>(getRandomFloorType());
-
-	const defaultFloorProps: FloorProps = {
-		position: [0, -2, 0],
-		rotation: [0.1, 0, 0],
-	};
 
 	useEffect(() => {
 		let mounted = true;

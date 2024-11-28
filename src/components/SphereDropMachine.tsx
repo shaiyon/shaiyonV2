@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Vector3 } from "three";
+import { Vector3, Plane, Matrix4, Euler } from "three";
 import { useThree } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
+
+import { defaultFloorProps } from "./floors/types";
 
 interface Sphere {
 	id: number;
@@ -32,6 +34,10 @@ export const SphereDropMachine: React.FC = () => {
 
 	// Impact spheres
 	const createImpactSpheres = (impactPoint: Vector3) => {
+		// Ensure the impact point is slightly above the floor
+		const floorY = defaultFloorProps.position[1];
+		const adjustedY = Math.max(impactPoint.y, floorY + 0.5);
+
 		const numSpheres = 8;
 		const newSpheres: Sphere[] = [];
 
@@ -44,7 +50,7 @@ export const SphereDropMachine: React.FC = () => {
 
 			newSpheres.push({
 				id: Date.now() + i,
-				position: [impactPoint.x, impactPoint.y, impactPoint.z],
+				position: [impactPoint.x, adjustedY, impactPoint.z],
 				color: `hsl(${Math.random() * 360}, 70%, 50%)`,
 				velocity: [velocityX, velocityY, velocityZ],
 			});
@@ -56,14 +62,45 @@ export const SphereDropMachine: React.FC = () => {
 	const handleSceneClick = (event: any) => {
 		if (event.defaultPrevented) return;
 
+		// Update raycaster with current pointer position
 		raycaster.setFromCamera(pointer, camera);
-		const intersects = raycaster.intersectObjects([]);
 
-		if (intersects.length > 0) {
-			createImpactSpheres(intersects[0].point);
+		// Create transformation matrix for the floor
+		const floorMatrix = new Matrix4();
+		const floorEuler = new Euler(...defaultFloorProps.rotation);
+		floorMatrix.makeRotationFromEuler(floorEuler);
+		floorMatrix.setPosition(new Vector3(...defaultFloorProps.position));
+
+		// Create and transform floor plane
+		const floorPlane = new Plane(new Vector3(0, 1, 0));
+		floorPlane.applyMatrix4(floorMatrix);
+
+		// Find intersection with transformed floor plane
+		const intersectionPoint = new Vector3();
+		const intersected = raycaster.ray.intersectPlane(
+			floorPlane,
+			intersectionPoint
+		);
+
+		if (intersected) {
+			// Transform intersection point back to world space
+			const inverseFloorMatrix = floorMatrix.clone().invert();
+			intersectionPoint.applyMatrix4(inverseFloorMatrix);
+
+			// Project point onto floor plane while maintaining mouse position
+			const floorNormal = new Vector3(0, 1, 0).applyMatrix4(floorMatrix);
+			const pointOnFloor = intersectionPoint
+				.clone()
+				.projectOnPlane(floorNormal);
+
+			// Adjust height to be slightly above floor
+			pointOnFloor.y = defaultFloorProps.position[1] + 0.5;
+
+			createImpactSpheres(pointOnFloor);
 		} else {
-			const point = new Vector3();
-			raycaster.ray.at(10, point);
+			// Fallback: project ray to reasonable distance
+			const point = raycaster.ray.at(10, new Vector3());
+			point.y = defaultFloorProps.position[1] + 0.5;
 			createImpactSpheres(point);
 		}
 	};

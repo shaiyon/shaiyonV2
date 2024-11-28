@@ -11,12 +11,6 @@ const TEXTURE_SETS = {
 		normal: "/src/assets/textures/rocky_terrain_nor_gl_1k.png",
 		rough: "/src/assets/textures/rocky_terrain_rough_1k.png",
 	},
-	AERIAL_SAND: {
-		diff: "/src/assets/textures/aerial_sand_diff_1k.jpg",
-		disp: "/src/assets/textures/aerial_sand_disp_1k.png",
-		normal: "/src/assets/textures/aerial_sand_nor_gl_1k.png",
-		rough: "/src/assets/textures/aerial_sand_rough_1k.jpg",
-	},
 	CLAY_ROOF: {
 		diff: "/src/assets/textures/clay_roof_tiles_02_diff_1k.jpg",
 		disp: "/src/assets/textures/clay_roof_tiles_02_disp_1k.png",
@@ -41,17 +35,17 @@ const TEXTURE_SETS = {
 		normal: "/src/assets/textures/rubberized_track_nor_gl_1k.png",
 		rough: "/src/assets/textures/rubberized_track_rough_1k.png",
 	},
-	RUSTY_METAL: {
-		diff: "/src/assets/textures/rusty_metal_grid_diff_1k.jpg",
-		disp: "/src/assets/textures/rusty_metal_grid_disp_1k.png",
-		normal: "/src/assets/textures/rusty_metal_grid_nor_gl_1k.png",
-		rough: "/src/assets/textures/rusty_metal_grid_rough_1k.png",
-	},
 	WOOD_CABINET: {
 		diff: "/src/assets/textures/wood_cabinet_worn_long_diff_1k.jpg",
 		disp: "/src/assets/textures/wood_cabinet_worn_long_disp_1k.png",
 		normal: "/src/assets/textures/wood_cabinet_worn_long_nor_gl_1k.png",
 		rough: "/src/assets/textures/wood_cabinet_worn_long_rough_1k.png",
+	},
+	CONCRETE_LAYERS: {
+		diff: "/src/assets/textures/concrete_layers_diff_1k.jpg",
+		disp: "/src/assets/textures/concrete_layers_disp_1k.png",
+		normal: "/src/assets/textures/concrete_layers_nor_gl_1k.png",
+		rough: "/src/assets/textures/concrete_layers_rough_1k.png",
 	},
 } as const;
 
@@ -91,6 +85,7 @@ const TexturedFloor: React.FC<TexturedFloorProps> = ({
 	return (
 		<RigidBody type="fixed" position={position} rotation={rotation}>
 			<mesh receiveShadow>
+				{/* <cylinderGeometry args={[10, 10, 0.5, 64]} />{" "} */}
 				<boxGeometry args={[20, 0.5, 20]} />
 				<meshStandardMaterial
 					{...textures}

@@ -344,6 +344,7 @@ const Model: React.FC<{
 
 export const ModelDropMachine: React.FC = () => {
 	const [droppedModels, setDroppedModels] = useState<DroppedModel[]>([]);
+	const [droppedConfigs, setDroppedConfigs] = useState<string[]>([]);
 
 	const spawnModel = useCallback(() => {
 		setDroppedModels((prev) => {
@@ -357,7 +358,6 @@ export const ModelDropMachine: React.FC = () => {
 				unspawnedConfigs[
 					Math.floor(Math.random() * unspawnedConfigs.length)
 				];
-
 			const randomX = Math.random() * 6 - 3;
 			const randomZ = Math.random() * 4 - 2;
 			const randomRotX = Math.random() * Math.PI;
@@ -374,17 +374,62 @@ export const ModelDropMachine: React.FC = () => {
 					: undefined,
 				hasSpawned: true,
 			};
-			console.log(newModel);
 
 			return [...prev, newModel];
 		});
 	}, []);
 
-	const cleanupModels = useCallback(() => {
-		setDroppedModels((prev) =>
-			prev.filter((model) => model.position[1] > -10)
-		);
+	const checkFallenModels = useCallback(() => {
+		setDroppedModels((prev) => {
+			// Find models that have fallen below threshold
+			const fallenModels = prev.filter(
+				(model) => model.position[1] <= -10
+			);
+
+			// If no fallen models, return unchanged state
+			if (fallenModels.length === 0) return prev;
+
+			// Add fallen model configs to droppedConfigs
+			setDroppedConfigs((current) => {
+				const newDroppedConfigs = fallenModels
+					.map((model) => model.configId)
+					.filter((configId) => !current.includes(configId));
+				return [...current, ...newDroppedConfigs];
+			});
+
+			// Remove fallen models from droppedModels
+			return prev.filter((model) => model.position[1] > -10);
+		});
 	}, []);
+
+	const respawnDroppedModels = useCallback(() => {
+		if (droppedConfigs.length === 0) return;
+
+		setDroppedModels((prev) => {
+			const newModels = droppedConfigs.map((configId) => {
+				const randomX = Math.random() * 6 - 3;
+				const randomZ = Math.random() * 4 - 2;
+				const randomRotX = Math.random() * Math.PI;
+				const randomRotY = Math.random() * Math.PI;
+				const randomRotZ = Math.random() * Math.PI;
+
+				const config = MODEL_CONFIGS.find((c) => c.id === configId);
+
+				return {
+					id: Date.now() + Math.random(),
+					configId: configId,
+					position: [randomX, 10, randomZ],
+					rotation: [randomRotX, randomRotY, randomRotZ],
+					color: config?.randomizeColor
+						? getRandomColor()
+						: undefined,
+					hasSpawned: true,
+				};
+			});
+
+			return [...prev, ...newModels];
+		});
+	}, [droppedConfigs]);
 
 	useEffect(() => {
 		const shouldContinueSpawning =
@@ -395,13 +440,23 @@ export const ModelDropMachine: React.FC = () => {
 			dropInterval = setInterval(spawnModel, 2000);
 		}
 
-		const cleanupInterval = setInterval(cleanupModels, 5000);
+		// Check frequently for fallen models
+		const checkInterval = setInterval(checkFallenModels, 100);
+
+		// Respawn dropped models every second
+		const respawnInterval = setInterval(respawnDroppedModels, 1000);
 
 		return () => {
 			if (dropInterval) clearInterval(dropInterval);
-			clearInterval(cleanupInterval);
+			clearInterval(checkInterval);
+			clearInterval(respawnInterval);
 		};
-	}, [droppedModels.length, spawnModel, cleanupModels]);
+	}, [
+		droppedModels.length,
+		spawnModel,
+		checkFallenModels,
+		respawnDroppedModels,
+	]);
 
 	return (
 		<Suspense fallback={null}>
