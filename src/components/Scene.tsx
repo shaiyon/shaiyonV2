@@ -8,7 +8,7 @@ import { type FloorProps, defaultFloorProps } from "./floors/types";
 import { FloatingText } from "./FloatingText";
 import { SocialLinks } from "./SocialLinks";
 import { SphereDropMachine } from "./SphereDropMachine";
-import { ModelDropMachine } from "./ModelDropMachine";
+import { ModelDropMachine } from "./models/ModelDropMachine";
 
 const getRandomFloorType = (): FloorType => {
 	const types = Object.keys(FLOOR_TYPES) as FloorType[];

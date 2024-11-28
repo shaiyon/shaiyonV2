@@ -1,9 +1,11 @@
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { OrbitControls, useProgress } from "@react-three/drei";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
+import { Vector3 } from "three";
 
+import { CameraProvider, useCameraContext } from "./CameraContext";
 import { Scene } from "./components/Scene";
 
 const LoadingScreen = () => {
@@ -70,33 +72,81 @@ const ResetButton = () => {
 	);
 };
 
-export default function App() {
+const Controls = () => {
+	const { isEnabled } = useCameraContext();
+
+	return (
+		<OrbitControls
+			enablePan={false}
+			enableZoom={isEnabled}
+			enableRotate={isEnabled}
+			rotateSpeed={1}
+			maxDistance={10}
+			minPolarAngle={Math.PI / 6}
+			maxPolarAngle={Math.PI / 1.95}
+			mouseButtons={{
+				LEFT: 0,
+				MIDDLE: 1,
+			}}
+		/>
+	);
+};
+
+const App = () => {
+	const isMobile = useMemo(
+		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+		[]
+	);
+	const defaultCameraPosition = isMobile
+		? new Vector3(0, 4, 12)
+		: new Vector3(0, 2, 8);
+	const [isPageVisible, setIsPageVisible] = useState(true);
+
+	useEffect(() => {
+		// Handle visibility change
+		const handleVisibilityChange = () => {
+			setIsPageVisible(!document.hidden);
+		};
+
+		// Handle mobile blur/focus events
+		const handleBlur = () => setIsPageVisible(false);
+		const handleFocus = () => setIsPageVisible(true);
+
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		window.addEventListener("blur", handleBlur);
+		window.addEventListener("focus", handleFocus);
+
+		return () => {
+			document.removeEventListener(
+				"visibilitychange",
+				handleVisibilityChange
+			);
+			window.removeEventListener("blur", handleBlur);
+			window.removeEventListener("focus", handleFocus);
+		};
+	}, []);
+
 	return (
 		<div className="w-screen h-screen">
 			<ResetButton />
-			<Suspense fallback={<LoadingScreen />}>
-				<Canvas shadows camera={{ position: [0, 2, 8], fov: 75 }}>
-					<OrbitControls
-						enablePan={false}
-						enableZoom={true}
-						enableRotate={true}
-						panSpeed={0.5}
-						rotateSpeed={0.5}
-						maxDistance={10}
-						// Restrict vertical rotation (in radians)
-						minPolarAngle={Math.PI / 6} // Can't look up more than 45° from horizontal
-						maxPolarAngle={Math.PI / 1.95} // Can't look down below horizontal
-						mouseButtons={{
-							LEFT: 0, // Rotate
-							MIDDLE: 1, // Zoom
-							// RIGHT: 0, // Pan
-						}}
-					/>
-					<Physics>
-						<Scene />
-					</Physics>
-				</Canvas>
-			</Suspense>
+			<CameraProvider>
+				<Suspense fallback={<LoadingScreen />}>
+					<Canvas
+						shadows
+						camera={{ position: defaultCameraPosition, fov: 75 }}
+					>
+						<Controls />
+						<Physics
+							paused={!isPageVisible}
+							timeStep={isPageVisible ? 1 / 60 : 0}
+						>
+							<Scene />
+						</Physics>
+					</Canvas>
+				</Suspense>
+			</CameraProvider>
 		</div>
 	);
-}
+};
+
+export default App;
