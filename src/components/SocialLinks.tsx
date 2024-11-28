@@ -22,14 +22,14 @@ interface SocialIconConfig {
 const SOCIAL_CONFIGS: SocialIconConfig[] = [
 	{
 		id: "linkedin",
-		svgPath: "/src/assets/linkedin.svg",
+		svgPath: "/linkedin.svg",
 		url: "https://linkedin.com/in/shaiyon",
 		scale: 0.001,
 		position: [1, 0.85, 0],
 	},
 	{
 		id: "github",
-		svgPath: "/src/assets/github.svg",
+		svgPath: "/github.svg",
 		url: "https://github.com/shaiyon",
 		scale: 0.0004,
 		position: [-1, 0.875, 0],

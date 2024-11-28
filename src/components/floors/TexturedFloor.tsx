@@ -3,49 +3,48 @@ import { RigidBody } from "@react-three/rapier";
 import * as THREE from "three";
 import type { FloorProps } from "./types";
 
-// Import all textures directly
 const TEXTURE_SETS = {
 	ROCKY_TERRAIN: {
-		diff: "/src/assets/textures/rocky_terrain_diff_1k.jpg",
-		disp: "/src/assets/textures/rocky_terrain_disp_1k.png",
-		normal: "/src/assets/textures/rocky_terrain_nor_gl_1k.png",
-		rough: "/src/assets/textures/rocky_terrain_rough_1k.png",
+		diff: "/textures/rocky_terrain_diff_1k.jpg",
+		disp: "/textures/rocky_terrain_disp_1k.png",
+		normal: "/textures/rocky_terrain_nor_gl_1k.png",
+		rough: "/textures/rocky_terrain_rough_1k.png",
 	},
 	CLAY_ROOF: {
-		diff: "/src/assets/textures/clay_roof_tiles_02_diff_1k.jpg",
-		disp: "/src/assets/textures/clay_roof_tiles_02_disp_1k.png",
-		normal: "/src/assets/textures/clay_roof_tiles_02_nor_gl_1k.png",
-		rough: "/src/assets/textures/clay_roof_tiles_02_rough_1k.png",
+		diff: "/textures/clay_roof_tiles_02_diff_1k.jpg",
+		disp: "/textures/clay_roof_tiles_02_disp_1k.png",
+		normal: "/textures/clay_roof_tiles_02_nor_gl_1k.png",
+		rough: "/textures/clay_roof_tiles_02_rough_1k.png",
 	},
 	DENIM: {
-		diff: "/src/assets/textures/denim_fabric_diff_1k.jpg",
-		disp: "/src/assets/textures/denim_fabric_disp_1k.png",
-		normal: "/src/assets/textures/denim_fabric_nor_gl_1k.png",
-		rough: "/src/assets/textures/denim_fabric_rough_1k.jpg",
+		diff: "/textures/denim_fabric_diff_1k.jpg",
+		disp: "/textures/denim_fabric_disp_1k.png",
+		normal: "/textures/denim_fabric_nor_gl_1k.png",
+		rough: "/textures/denim_fabric_rough_1k.jpg",
 	},
 	DRY_RIVERBED: {
-		diff: "/src/assets/textures/dry_riverbed_rock_diff_1k.jpg",
-		disp: "/src/assets/textures/dry_riverbed_rock_disp_1k.png",
-		normal: "/src/assets/textures/dry_riverbed_rock_nor_gl_1k.png",
-		rough: "/src/assets/textures/dry_riverbed_rock_rough_1k.png",
+		diff: "/textures/dry_riverbed_rock_diff_1k.jpg",
+		disp: "/textures/dry_riverbed_rock_disp_1k.png",
+		normal: "/textures/dry_riverbed_rock_nor_gl_1k.png",
+		rough: "/textures/dry_riverbed_rock_rough_1k.png",
 	},
 	RUBBERIZED_TRACK: {
-		diff: "/src/assets/textures/rubberized_track_diff_1k.jpg",
-		disp: "/src/assets/textures/rubberized_track_disp_1k.png",
-		normal: "/src/assets/textures/rubberized_track_nor_gl_1k.png",
-		rough: "/src/assets/textures/rubberized_track_rough_1k.png",
+		diff: "/textures/rubberized_track_diff_1k.jpg",
+		disp: "/textures/rubberized_track_disp_1k.png",
+		normal: "/textures/rubberized_track_nor_gl_1k.png",
+		rough: "/textures/rubberized_track_rough_1k.png",
 	},
 	WOOD_CABINET: {
-		diff: "/src/assets/textures/wood_cabinet_worn_long_diff_1k.jpg",
-		disp: "/src/assets/textures/wood_cabinet_worn_long_disp_1k.png",
-		normal: "/src/assets/textures/wood_cabinet_worn_long_nor_gl_1k.png",
-		rough: "/src/assets/textures/wood_cabinet_worn_long_rough_1k.png",
+		diff: "/textures/wood_cabinet_worn_long_diff_1k.jpg",
+		disp: "/textures/wood_cabinet_worn_long_disp_1k.png",
+		normal: "/textures/wood_cabinet_worn_long_nor_gl_1k.png",
+		rough: "/textures/wood_cabinet_worn_long_rough_1k.png",
 	},
 	CONCRETE_LAYERS: {
-		diff: "/src/assets/textures/concrete_layers_diff_1k.jpg",
-		disp: "/src/assets/textures/concrete_layers_disp_1k.png",
-		normal: "/src/assets/textures/concrete_layers_nor_gl_1k.png",
-		rough: "/src/assets/textures/concrete_layers_rough_1k.png",
+		diff: "/textures/concrete_layers_diff_1k.jpg",
+		disp: "/textures/concrete_layers_disp_1k.png",
+		normal: "/textures/concrete_layers_nor_gl_1k.png",
+		rough: "/textures/concrete_layers_rough_1k.png",
 	},
 } as const;
 

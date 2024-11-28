@@ -44,21 +44,21 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "california",
 		type: "obj",
-		path: "/src/assets/models/california.obj",
+		path: "/models/california.obj",
 		scale: 0.4,
 		randomizeColor: true,
 	},
 	{
 		id: "newyork",
 		type: "obj",
-		path: "/src/assets/models/newyork.obj",
+		path: "/models/newyork.obj",
 		scale: 0.4,
 		randomizeColor: true,
 	},
 	{
 		id: "python",
 		type: "svg",
-		svgPath: "/src/assets/models/python.svg",
+		svgPath: "/models/python.svg",
 		scale: 0.005,
 		depth: 20,
 		preserveColors: false,
@@ -67,7 +67,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "gitlab",
 		type: "svg",
-		svgPath: "/src/assets/models/gitlab.svg",
+		svgPath: "/models/gitlab.svg",
 		scale: 0.005,
 		depth: 10,
 		preserveColors: true,
@@ -76,7 +76,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "aws",
 		type: "svg",
-		svgPath: "/src/assets/models/aws.svg",
+		svgPath: "/models/aws.svg",
 		scale: 0.004,
 		depth: 25,
 		preserveColors: true,
@@ -85,7 +85,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "gcp",
 		type: "svg",
-		svgPath: "/src/assets/models/gcp.svg",
+		svgPath: "/models/gcp.svg",
 		scale: 0.0006,
 		depth: 100,
 		preserveColors: true,
@@ -94,7 +94,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "react",
 		type: "svg",
-		svgPath: "/src/assets/models/react.svg",
+		svgPath: "/models/react.svg",
 		scale: 0.04,
 		depth: 2,
 		preserveColors: true,
@@ -103,7 +103,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "terraform",
 		type: "svg",
-		svgPath: "/src/assets/models/terraform.svg",
+		svgPath: "/models/terraform.svg",
 		scale: 0.05,
 		depth: 2,
 		preserveColors: true,
@@ -112,7 +112,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "typescript",
 		type: "svg",
-		svgPath: "/src/assets/models/typescript.svg",
+		svgPath: "/models/typescript.svg",
 		scale: 0.0016,
 		depth: 50,
 		preserveColors: true,
