@@ -1,35 +1,112 @@
 import { useState, useEffect } from "react";
 import { Vector3, Plane, Matrix4, Euler } from "three";
+import * as THREE from "three";
+
 import { useThree } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
+import { useTexture } from "@react-three/drei";
 
 import { usePauseContext } from "../contexts/PauseContext";
 import { defaultFloorProps } from "./floors/types";
 
+const TEXTURE_SETS = {
+	RUBBER: {
+		diff: "/textures/rubberized_track_diff_1k.jpg",
+		disp: "/textures/rubberized_track_disp_1k.png",
+		normal: "/textures/rubberized_track_nor_gl_1k.png",
+		rough: "/textures/rubberized_track_rough_1k.png",
+	},
+	DENIM: {
+		diff: "/textures/denim_fabric_diff_1k.jpg",
+		disp: "/textures/denim_fabric_disp_1k.png",
+		normal: "/textures/denim_fabric_nor_gl_1k.png",
+		rough: "/textures/denim_fabric_rough_1k.jpg",
+	},
+	SNOW: {
+		diff: "/textures/snow_02_diff_1k.jpg",
+		disp: "/textures/snow_02_disp_1k.png",
+		normal: "/textures/snow_02_nor_gl_1k.png",
+		rough: "/textures/snow_02_rough_1k.jpg",
+		translucent: "/textures/snow_02_translucent_1k.png",
+	},
+} as const;
+
+type TextureSetType = keyof typeof TEXTURE_SETS;
+
 interface Sphere {
 	id: number;
 	position: [number, number, number];
-	color: string;
 	velocity?: [number, number, number];
+	textureType: TextureSetType;
 }
+
+const TexturedSphereMaterial: React.FC<{ textureType: TextureSetType }> = ({
+	textureType,
+}) => {
+	const textureSet = TEXTURE_SETS[textureType];
+	const textures = useTexture({
+		map: textureSet.diff,
+		displacementMap: textureSet.disp,
+		normalMap: textureSet.normal,
+		roughnessMap: textureSet.rough,
+	});
+
+	Object.values(textures).forEach((texture) => {
+		if (texture) {
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			texture.repeat.set(1, 1);
+			texture.minFilter = THREE.LinearMipMapLinearFilter;
+			texture.magFilter = THREE.LinearFilter;
+			texture.anisotropy = 16;
+		}
+	});
+
+	const getMaterialProps = () => {
+		if (textureType === "RUBBER") {
+			return {
+				normalScale: new THREE.Vector2(0.3, 0.3),
+				roughness: 0.9,
+				metalness: 0.0,
+				displacementScale: 0.05,
+				envMapIntensity: 0.2,
+			};
+		} else {
+			return {
+				normalScale: new THREE.Vector2(0.6, 0.6),
+				roughness: 1.0,
+				metalness: 0.0,
+				displacementScale: 0.1,
+				envMapIntensity: 0.1,
+			};
+		}
+	};
+
+	return <meshStandardMaterial {...textures} {...getMaterialProps()} />;
+};
 
 export const SphereDropMachine: React.FC = () => {
 	const { isPaused } = usePauseContext();
 	const [spheres, setSpheres] = useState<Sphere[]>([]);
 	const { camera, raycaster, pointer } = useThree();
 
+	const getRandomTextureType = (): TextureSetType => {
+		const textureTypes: TextureSetType[] = ["RUBBER", "DENIM", "SNOW"];
+		const randomIndex = Math.floor(Math.random() * textureTypes.length);
+		return textureTypes[randomIndex];
+	};
+	const selectedTextureType = getRandomTextureType();
+
 	// Regular falling spheres
 	const spawnFallingSphere = () => {
 		const randomX = Math.random() * 6 - 3;
-		const randomColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
 
 		setSpheres((prev) => [
 			...prev,
 			{
 				id: Date.now(),
 				position: [randomX, 12, -1],
-				color: randomColor,
-				velocity: [0, -0.1, 0], // Slight initial downward velocity
+				velocity: [0, -0.1, 0],
+				textureType: selectedTextureType,
 			},
 		]);
 	};
@@ -55,8 +132,8 @@ export const SphereDropMachine: React.FC = () => {
 			newSpheres.push({
 				id: Date.now() + i,
 				position: [impactPoint.x, adjustedY, impactPoint.z],
-				color: `hsl(${Math.random() * 360}, 70%, 50%)`,
 				velocity: [velocityX, velocityY, velocityZ],
+				textureType: selectedTextureType,
 			});
 		}
 
@@ -109,16 +186,14 @@ export const SphereDropMachine: React.FC = () => {
 		}
 	};
 
-	// Cleanup old spheres
 	const cleanupSpheres = () => {
 		setSpheres((prev) =>
 			prev.filter((sphere) => {
 				const posY = sphere.position[1];
-				return posY > -10; // Keep spheres above y = -10
+				return posY > -10;
 			})
 		);
 
-		// Limit total number of spheres
 		if (spheres.length > 100) {
 			setSpheres((prev) => prev.slice(-100));
 		}
@@ -127,13 +202,10 @@ export const SphereDropMachine: React.FC = () => {
 	useEffect(() => {
 		if (isPaused) return;
 
-		// Set up regular falling spheres interval
 		const fallInterval = setInterval(spawnFallingSphere, 200);
 
-		// Set up cleanup interval
 		const cleanupInterval = setInterval(cleanupSpheres, 1000);
 
-		// Add click listener
 		document.addEventListener("click", handleSceneClick);
 
 		return () => {
@@ -155,7 +227,9 @@ export const SphereDropMachine: React.FC = () => {
 				>
 					<mesh castShadow receiveShadow>
 						<sphereGeometry args={[0.3]} />
-						<meshStandardMaterial color={sphere.color} />
+						<TexturedSphereMaterial
+							textureType={sphere.textureType}
+						/>
 					</mesh>
 				</RigidBody>
 			))}

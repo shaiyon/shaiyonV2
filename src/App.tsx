@@ -3,7 +3,6 @@ import { Physics } from "@react-three/rapier";
 import { OrbitControls, useProgress } from "@react-three/drei";
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
-import { Vector3 } from "three";
 
 import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
 import { PauseProvider } from "./contexts/PauseContext";

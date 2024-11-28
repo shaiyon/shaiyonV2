@@ -16,23 +16,11 @@ const TEXTURE_SETS = {
 		normal: "/textures/clay_roof_tiles_02_nor_gl_1k.png",
 		rough: "/textures/clay_roof_tiles_02_rough_1k.png",
 	},
-	DENIM: {
-		diff: "/textures/denim_fabric_diff_1k.jpg",
-		disp: "/textures/denim_fabric_disp_1k.png",
-		normal: "/textures/denim_fabric_nor_gl_1k.png",
-		rough: "/textures/denim_fabric_rough_1k.jpg",
-	},
 	DRY_RIVERBED: {
 		diff: "/textures/dry_riverbed_rock_diff_1k.jpg",
 		disp: "/textures/dry_riverbed_rock_disp_1k.png",
 		normal: "/textures/dry_riverbed_rock_nor_gl_1k.png",
 		rough: "/textures/dry_riverbed_rock_rough_1k.png",
-	},
-	RUBBERIZED_TRACK: {
-		diff: "/textures/rubberized_track_diff_1k.jpg",
-		disp: "/textures/rubberized_track_disp_1k.png",
-		normal: "/textures/rubberized_track_nor_gl_1k.png",
-		rough: "/textures/rubberized_track_rough_1k.png",
 	},
 	WOOD_CABINET: {
 		diff: "/textures/wood_cabinet_worn_long_diff_1k.jpg",
