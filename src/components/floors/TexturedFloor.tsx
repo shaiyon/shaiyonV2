@@ -88,7 +88,7 @@ const TexturedFloor: React.FC<TexturedFloorProps> = ({
 				<boxGeometry args={[20, 0.5, 20]} />
 				<meshStandardMaterial
 					{...textures}
-					normalScale={[0.5, 0.5]}
+					normalScale={new THREE.Vector2(0.5, 0.5)}
 					roughness={0.8}
 					metalness={0.0}
 					displacementScale={0.1}

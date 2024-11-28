@@ -1,14 +1,16 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Group } from "three";
 import { RigidBody } from "@react-three/rapier";
+import { Group, Vector3 } from "three";
 import { SVGLoader } from "three-stdlib";
+
 import {
 	Shape,
 	ExtrudeGeometry,
 	Mesh,
 	MeshStandardMaterial,
 	Color,
+	Object3D,
 } from "three";
 
 interface SocialIconConfig {
@@ -72,7 +74,7 @@ interface SocialIconProps {
 const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 	const groupRef = useRef<Group>(null);
 	const [hovered, setHovered] = useState(false);
-	const [model, setModel] = useState<THREE.Object3D | null>(null);
+	const [model, setModel] = useState<Object3D | null>(null);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
 
 	// Load SVG model
@@ -100,7 +102,7 @@ const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 			// Scale animation on hover
 			const targetScale = hovered ? 1.1 : 1;
 			groupRef.current.scale.lerp(
-				{ x: targetScale, y: targetScale, z: targetScale } as any,
+				{ x: targetScale, y: targetScale, z: targetScale } as Vector3,
 				0.1
 			);
 

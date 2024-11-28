@@ -1,6 +1,16 @@
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import {
+	useState,
+	useEffect,
+	useRef,
+	useMemo,
+	useCallback,
+	Suspense,
+} from "react";
 import { OBJLoader, SVGLoader } from "three-stdlib";
-import { RigidBody } from "@react-three/rapier";
+import {
+	RigidBody,
+	type RigidBody as RigidBodyType,
+} from "@react-three/rapier";
 import * as THREE from "three";
 import {
 	Shape,
@@ -31,7 +41,7 @@ interface SVGModelConfig extends BaseModelConfig {
 
 type ModelConfig = OBJModelConfig | SVGModelConfig;
 
-interface DroppedModel {
+interface Model {
 	id: number;
 	configId: string;
 	position: [number, number, number];
@@ -69,7 +79,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 		type: "svg",
 		svgPath: "/models/gitlab.svg",
 		scale: 0.005,
-		depth: 10,
+		depth: 40,
 		preserveColors: true,
 		randomizeColor: false,
 	},
@@ -114,7 +124,7 @@ const MODEL_CONFIGS: ModelConfig[] = [
 		type: "svg",
 		svgPath: "/models/typescript.svg",
 		scale: 0.0016,
-		depth: 50,
+		depth: 75,
 		preserveColors: true,
 		randomizeColor: false,
 	},
@@ -284,12 +294,30 @@ const Model: React.FC<{
 	position: [number, number, number];
 	rotation: [number, number, number];
 	color?: string;
-}> = ({ config, position, rotation, color }) => {
+	onPositionUpdate: (id: number, position: [number, number, number]) => void;
+	id: number;
+}> = ({ config, position, rotation, color, onPositionUpdate, id }) => {
 	const objLoader = useMemo(() => new OBJLoader(), []);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
-
 	const [model, setModel] = useState<THREE.Object3D | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const rigidBodyRef = useRef<RigidBodyType>(null);
+
+	// Check position every second
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			if (rigidBodyRef.current) {
+				const currentPosition = rigidBodyRef.current.translation();
+				onPositionUpdate(id, [
+					currentPosition.x,
+					currentPosition.y,
+					currentPosition.z,
+				]);
+			}
+		}, 1000);
+
+		return () => clearInterval(intervalId);
+	}, [id, onPositionUpdate]);
 
 	useEffect(() => {
 		const loadModel = async () => {
@@ -326,6 +354,7 @@ const Model: React.FC<{
 
 	return (
 		<RigidBody
+			ref={rigidBodyRef}
 			position={position}
 			rotation={rotation}
 			colliders="hull"
@@ -343,124 +372,78 @@ const Model: React.FC<{
 };
 
 export const ModelDropMachine: React.FC = () => {
-	const [droppedModels, setDroppedModels] = useState<DroppedModel[]>([]);
-	const [droppedConfigs, setDroppedConfigs] = useState<string[]>([]);
+	const [models, setModels] = useState<Model[]>([]);
 
-	const spawnModel = useCallback(() => {
-		setDroppedModels((prev) => {
-			const unspawnedConfigs = MODEL_CONFIGS.filter(
-				(config) => !prev.some((model) => model.configId === config.id)
-			);
-
-			if (unspawnedConfigs.length === 0) return prev;
-
-			const randomConfig =
-				unspawnedConfigs[
-					Math.floor(Math.random() * unspawnedConfigs.length)
-				];
-			const randomX = Math.random() * 6 - 3;
-			const randomZ = Math.random() * 4 - 2;
-			const randomRotX = Math.random() * Math.PI;
-			const randomRotY = Math.random() * Math.PI;
-			const randomRotZ = Math.random() * Math.PI;
-
-			const newModel: DroppedModel = {
-				id: Date.now(),
-				configId: randomConfig.id,
-				position: [randomX, 10, randomZ],
-				rotation: [randomRotX, randomRotY, randomRotZ],
-				color: randomConfig.randomizeColor
-					? getRandomColor()
-					: undefined,
-				hasSpawned: true,
-			};
-
-			return [...prev, newModel];
-		});
-	}, []);
-
-	const checkFallenModels = useCallback(() => {
-		setDroppedModels((prev) => {
-			// Find models that have fallen below threshold
-			const fallenModels = prev.filter(
-				(model) => model.position[1] <= -10
-			);
-
-			// If no fallen models, return unchanged state
-			if (fallenModels.length === 0) return prev;
-
-			// Add fallen model configs to droppedConfigs
-			setDroppedConfigs((current) => {
-				const newDroppedConfigs = fallenModels
-					.map((model) => model.configId)
-					.filter((configId) => !current.includes(configId));
-				return [...current, ...newDroppedConfigs];
-			});
-
-			// Remove fallen models from droppedModels
-			return prev.filter((model) => model.position[1] > -10);
-		});
-	}, []);
-
-	const respawnDroppedModels = useCallback(() => {
-		if (droppedConfigs.length === 0) return;
-
-		setDroppedModels((prev) => {
-			const newModels = droppedConfigs.map((configId) => {
-				const randomX = Math.random() * 6 - 3;
-				const randomZ = Math.random() * 4 - 2;
-				const randomRotX = Math.random() * Math.PI;
-				const randomRotY = Math.random() * Math.PI;
-				const randomRotZ = Math.random() * Math.PI;
-
-				const config = MODEL_CONFIGS.find((c) => c.id === configId);
-
-				return {
-					id: Date.now() + Math.random(),
-					configId: configId,
-					position: [randomX, 10, randomZ],
-					rotation: [randomRotX, randomRotY, randomRotZ],
-					color: config?.randomizeColor
-						? getRandomColor()
-						: undefined,
-					hasSpawned: true,
-				};
-			});
-
-			return [...prev, ...newModels];
-		});
-	}, [droppedConfigs]);
-
-	useEffect(() => {
-		const shouldContinueSpawning =
-			droppedModels.length < MODEL_CONFIGS.length;
-
-		let dropInterval: NodeJS.Timeout | null = null;
-		if (shouldContinueSpawning) {
-			dropInterval = setInterval(spawnModel, 2000);
-		}
-
-		// Check frequently for fallen models
-		const checkInterval = setInterval(checkFallenModels, 100);
-
-		// Respawn dropped models every second
-		const respawnInterval = setInterval(respawnDroppedModels, 1000);
-
-		return () => {
-			if (dropInterval) clearInterval(dropInterval);
-			clearInterval(checkInterval);
-			clearInterval(respawnInterval);
+	const createModel = useCallback((config: ModelConfig): Model => {
+		return {
+			id: Date.now() + Math.random(),
+			configId: config.id,
+			position: [Math.random() * 6 - 3, 10, Math.random() * 4 - 2],
+			rotation: [
+				Math.random() * Math.PI,
+				Math.random() * Math.PI,
+				Math.random() * Math.PI,
+			],
+			color: config.randomizeColor ? getRandomColor() : undefined,
+			hasSpawned: true,
 		};
-	}, [
-		droppedModels.length,
-		spawnModel,
-		checkFallenModels,
-		respawnDroppedModels,
-	]);
+	}, []);
+
+	// Staggered initial spawn
+	useEffect(() => {
+		// Create a copy of MODEL_CONFIGS that we can shuffle
+		const shuffledConfigs = [...MODEL_CONFIGS].sort(
+			() => Math.random() - 0.5
+		);
+
+		// Spawn one model every 1.5 seconds
+		shuffledConfigs.forEach((config, index) => {
+			setTimeout(() => {
+				console.log(`[SPAWN] Releasing ${config.id}`);
+				setModels((prev) => [...prev, createModel(config)]);
+			}, index * 1500); // 1.5 seconds between each spawn
+		});
+	}, [createModel]);
+
+	const handlePositionUpdate = useCallback(
+		(id: number, newPosition: [number, number, number]) => {
+			setModels((prevModels) => {
+				// Check if the model has fallen below -10
+				if (newPosition[1] <= -10) {
+					console.log(
+						`[RESPAWN] Model ${id} has fallen below -10, respawning`
+					);
+					// Find the fallen model and its config
+					const fallenModel = prevModels.find(
+						(model) => model.id === id
+					);
+					if (!fallenModel) return prevModels;
+
+					const config = MODEL_CONFIGS.find(
+						(c) => c.id === fallenModel.configId
+					);
+					if (!config) return prevModels;
+
+					// Replace the fallen model with a new instance of the same type
+					return prevModels.map((model) =>
+						model.id === id ? createModel(config) : model
+					);
+				}
+
+				// Otherwise just update the position
+				return prevModels.map((model) =>
+					model.id === id
+						? { ...model, position: newPosition }
+						: model
+				);
+			});
+		},
+		[createModel]
+	);
 
 	return (
 		<Suspense fallback={null}>
-			{droppedModels.map((model) => {
+			{models.map((model) => {
 				const config = MODEL_CONFIGS.find(
 					(c) => c.id === model.configId
 				);
@@ -469,10 +452,12 @@ export const ModelDropMachine: React.FC = () => {
 				return (
 					<Model
 						key={model.id}
+						id={model.id}
 						config={config}
 						position={model.position}
 						rotation={model.rotation}
 						color={model.color}
+						onPositionUpdate={handlePositionUpdate}
 					/>
 				);
 			})}
