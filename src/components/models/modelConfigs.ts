@@ -78,4 +78,13 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		preserveColors: true,
 		randomizeColor: false,
 	},
+	{
+		id: "docker",
+		type: "svg",
+		svgPath: "/models/docker.svg",
+		scale: 0.04,
+		depth: 2.5,
+		preserveColors: true,
+		randomizeColor: false,
+	},
 ];

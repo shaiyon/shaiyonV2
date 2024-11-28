@@ -76,6 +76,8 @@ export const createExtrudedGeometry = (
 			pathColor = isFirstPath
 				? new Color("#387EB8") // Python blue for first path
 				: new Color("#FFE052"); // Python yellow for second path
+		} else if (config.id === "docker") {
+			pathColor = new Color("#2396ED");
 		} else {
 			// Handle class-based colors by checking node attributes
 			const node = path.userData?.node;
