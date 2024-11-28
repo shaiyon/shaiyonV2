@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Suspense } from "react";
+import { usePauseContext } from "../../contexts/PauseContext";
 import { ModelConfig } from "./types";
 import { Model } from "./Model";
 import { MODEL_CONFIGS } from "./modelConfigs";
@@ -21,7 +22,9 @@ const getRandomColor = () => {
 };
 
 export const ModelDropMachine: React.FC = () => {
+	const { isPaused } = usePauseContext();
 	const [models, setModels] = useState<DropModel[]>([]);
+	const [spawnQueue, setSpawnQueue] = useState<ModelConfig[]>([]);
 
 	const createModel = useCallback((config: ModelConfig): DropModel => {
 		return {
@@ -40,6 +43,8 @@ export const ModelDropMachine: React.FC = () => {
 
 	const handlePositionUpdate = useCallback(
 		(id: number, newPosition: [number, number, number]) => {
+			if (isPaused) return; // Don't update positions when paused
+
 			setModels((prevModels) => {
 				// Check if the model has fallen below -10
 				if (newPosition[1] <= -10) {
@@ -71,24 +76,39 @@ export const ModelDropMachine: React.FC = () => {
 				);
 			});
 		},
-		[createModel]
+		[createModel, isPaused]
 	);
 
-	// Staggered initial spawn
+	// Initial setup
 	useEffect(() => {
-		// Create a copy of MODEL_CONFIGS that we can shuffle
+		// Create a shuffled queue of configs
 		const shuffledConfigs = [...MODEL_CONFIGS].sort(
 			() => Math.random() - 0.5
 		);
+		setSpawnQueue(shuffledConfigs);
+	}, []);
 
-		// Spawn one model every 1.5 seconds
-		shuffledConfigs.forEach((config, index) => {
-			setTimeout(() => {
-				console.log(`[SPAWN] Releasing ${config.id}`);
-				setModels((prev) => [...prev, createModel(config)]);
-			}, index * 1500);
-		});
-	}, [createModel]);
+	// Handle spawning with pause support
+	useEffect(() => {
+		if (isPaused || spawnQueue.length === 0) return;
+
+		const spawnInterval = setInterval(() => {
+			setSpawnQueue((prevQueue) => {
+				if (prevQueue.length === 0) return prevQueue;
+
+				const [nextConfig, ...remainingConfigs] = prevQueue;
+				console.log(`[SPAWN] Releasing ${nextConfig.id}`);
+
+				setModels((prevModels) => [
+					...prevModels,
+					createModel(nextConfig),
+				]);
+				return remainingConfigs;
+			});
+		}, 1500);
+
+		return () => clearInterval(spawnInterval);
+	}, [isPaused, createModel, spawnQueue]);
 
 	return (
 		<Suspense fallback={null}>

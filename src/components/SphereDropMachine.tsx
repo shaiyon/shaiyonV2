@@ -3,6 +3,7 @@ import { Vector3, Plane, Matrix4, Euler } from "three";
 import { useThree } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
 
+import { usePauseContext } from "../contexts/PauseContext";
 import { defaultFloorProps } from "./floors/types";
 
 interface Sphere {
@@ -13,6 +14,7 @@ interface Sphere {
 }
 
 export const SphereDropMachine: React.FC = () => {
+	const { isPaused } = usePauseContext();
 	const [spheres, setSpheres] = useState<Sphere[]>([]);
 	const { camera, raycaster, pointer } = useThree();
 
@@ -34,6 +36,8 @@ export const SphereDropMachine: React.FC = () => {
 
 	// Impact spheres
 	const createImpactSpheres = (impactPoint: Vector3) => {
+		if (isPaused) return;
+
 		// Ensure the impact point is slightly above the floor
 		const floorY = defaultFloorProps.position[1];
 		const adjustedY = Math.max(impactPoint.y, floorY + 0.5);
@@ -121,6 +125,8 @@ export const SphereDropMachine: React.FC = () => {
 	};
 
 	useEffect(() => {
+		if (isPaused) return;
+
 		// Set up regular falling spheres interval
 		const fallInterval = setInterval(spawnFallingSphere, 200);
 
@@ -135,7 +141,7 @@ export const SphereDropMachine: React.FC = () => {
 			clearInterval(cleanupInterval);
 			document.removeEventListener("click", handleSceneClick);
 		};
-	});
+	}, [isPaused]);
 
 	return (
 		<>

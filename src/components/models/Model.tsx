@@ -13,7 +13,7 @@ import {
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
-import { useCameraContext } from "../../CameraContext";
+import { useCameraContext } from "../../contexts/CameraContext";
 import { defaultFloorProps } from "../floors/types";
 import { ModelConfig, SVGModelConfig } from "./types";
 import { applyColorToModel, createExtrudedGeometry } from "./modelUtils";

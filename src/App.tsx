@@ -5,7 +5,8 @@ import { Suspense, useState, useEffect, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 import { Vector3 } from "three";
 
-import { CameraProvider, useCameraContext } from "./CameraContext";
+import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
+import { PauseProvider } from "./contexts/PauseContext";
 import { Scene } from "./components/Scene";
 
 const LoadingScreen = () => {
@@ -80,7 +81,7 @@ const Controls = () => {
 			enablePan={false}
 			enableZoom={isEnabled}
 			enableRotate={isEnabled}
-			rotateSpeed={1}
+			rotateSpeed={0.75}
 			maxDistance={10}
 			minPolarAngle={Math.PI / 6}
 			maxPolarAngle={Math.PI / 1.95}
@@ -97,9 +98,7 @@ const App = () => {
 		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
 		[]
 	);
-	const defaultCameraPosition = isMobile
-		? new Vector3(0, 4, 12)
-		: new Vector3(0, 2, 8);
+	const defaultCameraPosition = isMobile ? [0, 4, 12] : [0, 2, 8];
 	const [isPageVisible, setIsPageVisible] = useState(true);
 
 	useEffect(() => {
@@ -130,20 +129,25 @@ const App = () => {
 		<div className="w-screen h-screen">
 			<ResetButton />
 			<CameraProvider>
-				<Suspense fallback={<LoadingScreen />}>
-					<Canvas
-						shadows
-						camera={{ position: defaultCameraPosition, fov: 75 }}
-					>
-						<Controls />
-						<Physics
-							paused={!isPageVisible}
-							timeStep={isPageVisible ? 1 / 60 : 0}
+				<PauseProvider isPaused={!isPageVisible}>
+					<Suspense fallback={<LoadingScreen />}>
+						<Canvas
+							shadows
+							camera={{
+								position: defaultCameraPosition,
+								fov: 75,
+							}}
 						>
-							<Scene />
-						</Physics>
-					</Canvas>
-				</Suspense>
+							<Controls />
+							<Physics
+								paused={!isPageVisible}
+								timeStep={isPageVisible ? 1 / 60 : 0}
+							>
+								<Scene />
+							</Physics>
+						</Canvas>
+					</Suspense>
+				</PauseProvider>
 			</CameraProvider>
 		</div>
 	);
