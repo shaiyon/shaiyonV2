@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { Vector3, Plane, Matrix4, Euler } from "three";
 import * as THREE from "three";
-
 import { useThree } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
 import { useTexture } from "@react-three/drei";
-
 import { usePauseContext } from "../contexts/PauseContext";
 import { defaultFloorProps } from "./floors/types";
+import type { SphereTextureType } from "../textureTypes";
 
-const TEXTURE_SETS = {
+export const TEXTURE_SETS = {
 	RUBBER: {
 		diff: "/textures/rubberized_track_diff_1k.jpg",
 		disp: "/textures/rubberized_track_disp_1k.png",
@@ -31,16 +30,17 @@ const TEXTURE_SETS = {
 	},
 } as const;
 
-type TextureSetType = keyof typeof TEXTURE_SETS;
-
 interface Sphere {
 	id: number;
 	position: [number, number, number];
 	velocity?: [number, number, number];
-	textureType: TextureSetType;
 }
 
-const TexturedSphereMaterial: React.FC<{ textureType: TextureSetType }> = ({
+interface TexturedSphereMaterialProps {
+	textureType: SphereTextureType;
+}
+
+const TexturedSphereMaterial: React.FC<TexturedSphereMaterialProps> = ({
 	textureType,
 }) => {
 	const textureSet = TEXTURE_SETS[textureType];
@@ -84,17 +84,16 @@ const TexturedSphereMaterial: React.FC<{ textureType: TextureSetType }> = ({
 	return <meshStandardMaterial {...textures} {...getMaterialProps()} />;
 };
 
-export const SphereDropMachine: React.FC = () => {
+interface SphereDropMachineProps {
+	selectedTextureType: SphereTextureType;
+}
+
+export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
+	selectedTextureType,
+}) => {
 	const { isPaused } = usePauseContext();
 	const [spheres, setSpheres] = useState<Sphere[]>([]);
 	const { camera, raycaster, pointer } = useThree();
-
-	const getRandomTextureType = (): TextureSetType => {
-		const textureTypes: TextureSetType[] = ["RUBBER", "DENIM", "SNOW"];
-		const randomIndex = Math.floor(Math.random() * textureTypes.length);
-		return textureTypes[randomIndex];
-	};
-	const selectedTextureType = getRandomTextureType();
 
 	// Regular falling spheres
 	const spawnFallingSphere = () => {
@@ -106,7 +105,6 @@ export const SphereDropMachine: React.FC = () => {
 				id: Date.now(),
 				position: [randomX, 12, -1],
 				velocity: [0, -0.1, 0],
-				textureType: selectedTextureType,
 			},
 		]);
 	};
@@ -133,17 +131,15 @@ export const SphereDropMachine: React.FC = () => {
 				id: Date.now() + i,
 				position: [impactPoint.x, adjustedY, impactPoint.z],
 				velocity: [velocityX, velocityY, velocityZ],
-				textureType: selectedTextureType,
 			});
 		}
 
 		setSpheres((prev) => [...prev, ...newSpheres]);
 	};
 
-	const handleSceneClick = (event: any) => {
-		if (event.defaultPrevented) return;
+	const handleSceneClick = (event: MouseEvent) => {
+		if (!event || event.defaultPrevented) return;
 
-		// Update raycaster with current pointer position
 		raycaster.setFromCamera(pointer, camera);
 
 		// Create transformation matrix for the floor
@@ -164,20 +160,7 @@ export const SphereDropMachine: React.FC = () => {
 		);
 
 		if (intersected) {
-			// Transform intersection point back to world space
-			const inverseFloorMatrix = floorMatrix.clone().invert();
-			intersectionPoint.applyMatrix4(inverseFloorMatrix);
-
-			// Project point onto floor plane while maintaining mouse position
-			const floorNormal = new Vector3(0, 1, 0).applyMatrix4(floorMatrix);
-			const pointOnFloor = intersectionPoint
-				.clone()
-				.projectOnPlane(floorNormal);
-
-			// Adjust height to be slightly above floor
-			pointOnFloor.y = defaultFloorProps.position[1] + 0.5;
-
-			createImpactSpheres(pointOnFloor);
+			createImpactSpheres(intersectionPoint);
 		} else {
 			// Fallback: project ray to reasonable distance
 			const point = raycaster.ray.at(10, new Vector3());
@@ -203,7 +186,6 @@ export const SphereDropMachine: React.FC = () => {
 		if (isPaused) return;
 
 		const fallInterval = setInterval(spawnFallingSphere, 200);
-
 		const cleanupInterval = setInterval(cleanupSpheres, 1000);
 
 		document.addEventListener("click", handleSceneClick);
@@ -228,7 +210,7 @@ export const SphereDropMachine: React.FC = () => {
 					<mesh castShadow receiveShadow>
 						<sphereGeometry args={[0.3]} />
 						<TexturedSphereMaterial
-							textureType={sphere.textureType}
+							textureType={selectedTextureType}
 						/>
 					</mesh>
 				</RigidBody>

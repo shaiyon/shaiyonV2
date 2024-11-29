@@ -1,38 +1,33 @@
 import { Environment, Sky } from "@react-three/drei";
-import { Suspense, useState, useEffect, FC, useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { FLOOR_TYPES, type FloorType, loadFloor } from "./floors";
-import { type FloorProps, defaultFloorProps } from "./floors/types";
-
+import { loadFloor } from "./floors";
+import { defaultFloorProps } from "./floors/types";
 import { FloatingText } from "./FloatingText";
 import { SocialLinks } from "./SocialLinks";
 import { SphereDropMachine } from "./SphereDropMachine";
 import { ModelDropMachine } from "./models/ModelDropMachine";
+import type { SelectedTextures } from "../textureTypes";
 
-const getRandomFloorType = (): FloorType => {
-	const types = Object.keys(FLOOR_TYPES) as FloorType[];
-	const randomIndex = Math.floor(Math.random() * types.length);
-	return types[randomIndex];
-};
+interface SceneProps {
+	selectedTextures: SelectedTextures;
+}
 
-export const Scene: FC = () => {
+export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
 	const { camera } = useThree();
 	const skyRef = useRef<THREE.Group>(null);
-
-	const [Floor, setFloor] = useState<React.ComponentType<FloorProps> | null>(
-		null
-	);
-	const [floorType] = useState<FloorType>(getRandomFloorType());
+	const [Floor, setFloor] = useState<React.ComponentType<any> | null>(null);
 
 	useEffect(() => {
 		let mounted = true;
 
 		const loadFloorComponent = async () => {
 			try {
-				const FloorComponent = await loadFloor(floorType);
+				const FloorComponent = await loadFloor(
+					selectedTextures.floorType
+				);
 				if (mounted && FloorComponent) {
-					console.log("Floor loaded:", floorType);
 					setFloor(() => FloorComponent);
 				}
 			} catch (error) {
@@ -41,11 +36,10 @@ export const Scene: FC = () => {
 		};
 
 		loadFloorComponent();
-
 		return () => {
 			mounted = false;
 		};
-	}, [floorType]);
+	}, [selectedTextures.floorType]);
 
 	useFrame(() => {
 		if (skyRef.current) {
@@ -70,18 +64,16 @@ export const Scene: FC = () => {
 					mieDirectionalG={0.8}
 				/>
 			</group>
-
 			<Environment preset="city" />
 			<ambientLight intensity={0.5} />
 			<directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-
 			<FloatingText />
 			<SocialLinks />
-			<SphereDropMachine />
+			<SphereDropMachine
+				selectedTextureType={selectedTextures.sphereType}
+			/>
 			<ModelDropMachine />
-			<Suspense fallback={null}>
-				{Floor && <Floor {...defaultFloorProps} />}
-			</Suspense>
+			{Floor && <Floor {...defaultFloorProps} />}
 		</>
 	);
 };
