@@ -10,7 +10,7 @@ const SHOCKWAVE_RADIUS = 5;
 const SHOCKWAVE_FORCE = 3;
 const SHOCKWAVE_UPLIFT = 2;
 const MIN_FORCE = 1;
-const MAX_CLICK_DURATION = 150; // ms - threshold for what counts as a "quick" click
+const MAX_CLICK_DURATION = 100;
 
 export const ShockwaveHandler: React.FC = () => {
 	const { isPaused } = usePauseContext();

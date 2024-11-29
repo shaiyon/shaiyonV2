@@ -1,6 +1,6 @@
 export interface BaseModelConfig {
 	id: string;
-	scale?: number;
+	scale: number;
 	randomizeColor?: boolean;
 	color?: string;
 	hoverText?: string;

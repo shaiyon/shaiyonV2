@@ -1,22 +1,22 @@
 import { ModelConfig } from "./types";
 
 export const MODEL_CONFIGS: ModelConfig[] = [
-	{
-		id: "california",
-		type: "obj",
-		path: "/models/california.obj",
-		scale: 0.4,
-		randomizeColor: true,
-		hoverText: "From the Bay Area, CA",
-	},
-	{
-		id: "newyork",
-		type: "obj",
-		path: "/models/newyork.obj",
-		scale: 0.4,
-		randomizeColor: true,
-		hoverText: "Live in Brooklyn, NY",
-	},
+	// {
+	// 	id: "california",
+	// 	type: "obj",
+	// 	path: "/models/california.obj",
+	// 	scale: 0.4,
+	// 	randomizeColor: true,
+	// 	hoverText: "From the Bay Area, CA",
+	// },
+	// {
+	// 	id: "newyork",
+	// 	type: "obj",
+	// 	path: "/models/newyork.obj",
+	// 	scale: 0.4,
+	// 	randomizeColor: true,
+	// 	hoverText: "Live in Brooklyn, NY",
+	// },
 	{
 		id: "python",
 		type: "svg",
@@ -51,11 +51,11 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		id: "gcp",
 		type: "svg",
 		svgPath: "/models/gcp.svg",
-		scale: 0.0006,
+		scale: 0.0005,
 		depth: 100,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Build on Google Cloud Platform",
+		hoverText: "Create on Google Cloud Platform",
 	},
 	{
 		id: "react",
@@ -65,7 +65,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Create web experiences with React",
+		hoverText: "Develop web experiences with React",
 	},
 	{
 		id: "terraform",
@@ -103,14 +103,14 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		path: "/models/brain.obj",
 		scale: 0.0025,
 		randomizeColor: false,
-		hoverText: "Architect AI systems",
+		hoverText: "Build AI systems",
 		color: "#FF91AF",
 	},
 	{
 		id: "book",
 		type: "glb",
 		glbPath: "/models/book.glb",
-		scale: 0.5,
+		scale: 0.45,
 		randomizeColor: false,
 		hoverText: "Education in Stats, Econ, & CS",
 	},

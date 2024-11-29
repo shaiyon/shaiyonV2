@@ -1,18 +1,21 @@
+import { useState, useEffect, useRef } from "react";
+import { RefreshCw, Target } from "lucide-react";
+
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { OrbitControls } from "@react-three/drei";
-import { useState, useEffect, useMemo, useRef } from "react";
-import { RefreshCw, Target } from "lucide-react";
-import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
-import { PauseProvider } from "./contexts/PauseContext";
-import { Scene } from "./components/Scene";
-import { AssetLoader } from "./AssetLoader";
-import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
+
 // import {
 // 	PerformanceMonitor,
 // 	PerformanceStats,
 // } from "./components/PerformanceMonitor";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { useDevice } from "./utils/useDevice";
+import { AssetLoader } from "./AssetLoader";
+import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
+import { PauseProvider } from "./contexts/PauseContext";
+import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
+import { Scene } from "./components/Scene";
 
 interface ControlsProps {
 	controlsRef: React.RefObject<OrbitControlsImpl>;
@@ -93,10 +96,8 @@ const ActionButtons = ({
 
 export const App = () => {
 	const controlsRef = useRef<OrbitControlsImpl>(null);
-	const isMobile = useMemo(
-		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
-		[]
-	);
+	const { isMobile } = useDevice();
+
 	const defaultCameraPosition = isMobile ? [0, 4, 14] : [0, 2, 8];
 	const [isPageVisible, setIsPageVisible] = useState(true);
 	const [selectedTextures] = useState<SelectedTextures>(

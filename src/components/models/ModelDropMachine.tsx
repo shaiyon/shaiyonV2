@@ -5,6 +5,9 @@ import { ModelConfig } from "./types";
 import { Model } from "./Model";
 import { MODEL_CONFIGS } from "./modelConfigs";
 
+const SPAWN_INTERVAL = 1 * 1000;
+const Y_THRESHOLD = -10;
+
 interface DropModel {
 	id: number;
 	configId: string;
@@ -43,10 +46,10 @@ export const ModelDropMachine: React.FC = () => {
 
 	const handlePositionUpdate = useCallback(
 		(id: number, newPosition: [number, number, number]) => {
-			if (isPaused) return; // Don't update positions when paused
+			if (isPaused) return;
 
 			setModels((prevModels) => {
-				if (newPosition[1] <= -5) {
+				if (newPosition[1] <= Y_THRESHOLD) {
 					console.log(`[RESPAWN] Model ${id} has fallen, respawning`);
 					// Find the fallen model and its config
 					const fallenModel = prevModels.find(
@@ -102,7 +105,7 @@ export const ModelDropMachine: React.FC = () => {
 				]);
 				return remainingConfigs;
 			});
-		}, 1500);
+		}, SPAWN_INTERVAL);
 
 		return () => clearInterval(spawnInterval);
 	}, [isPaused, createModel, spawnQueue]);

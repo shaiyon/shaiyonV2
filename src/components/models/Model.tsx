@@ -17,6 +17,7 @@ import {
 import { useThree, useFrame } from "@react-three/fiber";
 import { Text3D } from "@react-three/drei";
 
+import { useDevice } from "../../utils/useDevice";
 import { useCameraContext } from "../../contexts/CameraContext";
 import { defaultFloorProps } from "../floors/types";
 import { ModelConfig, SVGModelConfig } from "./types";
@@ -88,7 +89,7 @@ const ModelDescription = ({
 			ref={textRef}
 			font="/fonts/helvetiker_regular.json"
 			size={0.3}
-			height={0.06}
+			height={0.08}
 			curveSegments={12}
 		>
 			{text}
@@ -111,10 +112,7 @@ export const Model: React.FC<ModelProps> = ({
 	onPositionUpdate,
 	id,
 }) => {
-	const isMobile = useMemo(
-		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
-		[]
-	);
+	const { isMobile } = useDevice();
 
 	const { setIsEnabled: setCameraEnabled } = useCameraContext();
 	const { camera, raycaster, pointer } = useThree();
@@ -347,19 +345,20 @@ export const Model: React.FC<ModelProps> = ({
 						? "hull"
 						: "cuboid"
 				}
-				restitution={0.3}
-				friction={0.8}
-				linearDamping={0.5}
-				angularDamping={0.5}
-				mass={config.id === "brain" ? 5 : 1}
+				restitution={0.5}
+				friction={0.3}
+				linearDamping={0.01}
+				angularDamping={0.01}
+				mass={0.1}
+				canSleep={false}
 			>
 				<group
 					onPointerDown={handlePointerDown}
-					userData={{ isDraggableModel: true }} // Add this line
+					userData={{ isDraggableModel: true }}
 				>
 					<primitive
 						object={model}
-						scale={config.scale ?? 1 * (isMobile ? 2 : 1)}
+						scale={config.scale * (isMobile ? 1.75 : 1.25)}
 						receiveShadow
 						castShadow
 					/>
