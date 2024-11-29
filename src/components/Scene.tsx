@@ -7,7 +7,7 @@ import { loadFloor } from "./floors";
 import { defaultFloorProps } from "./floors/types";
 import { FloatingText } from "./FloatingText";
 import { SocialLinks } from "./SocialLinks";
-import { SphereDropMachine } from "./SphereDropMachine";
+import { SphereDropMachine } from "./spheres/SphereDropMachine";
 import { ModelDropMachine } from "./models/ModelDropMachine";
 import type { SelectedTextures } from "../textureTypes";
 import { ShockwaveHandler } from "./ShockwaveHandler";

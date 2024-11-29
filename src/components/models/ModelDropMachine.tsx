@@ -46,11 +46,8 @@ export const ModelDropMachine: React.FC = () => {
 			if (isPaused) return; // Don't update positions when paused
 
 			setModels((prevModels) => {
-				// Check if the model has fallen below -10
-				if (newPosition[1] <= -10) {
-					console.log(
-						`[RESPAWN] Model ${id} has fallen below -10, respawning`
-					);
+				if (newPosition[1] <= -5) {
+					console.log(`[RESPAWN] Model ${id} has fallen, respawning`);
 					// Find the fallen model and its config
 					const fallenModel = prevModels.find(
 						(model) => model.id === id

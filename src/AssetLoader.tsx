@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as THREE from "three";
-import { SPHERE_TEXTURE_SETS } from "./components/SphereDropMachine";
+import { SPHERE_TEXTURE_SETS } from "./components/spheres/sphereTextures";
 import { FLOOR_TEXTURE_SETS } from "./components/floors/floorTextures";
 import type { SelectedTextures } from "./textureTypes";
 

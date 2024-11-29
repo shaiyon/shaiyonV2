@@ -6,6 +6,7 @@ import React, {
 	useCallback,
 } from "react";
 import { OBJLoader, SVGLoader } from "three-stdlib";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
 
@@ -129,6 +130,11 @@ export const Model: React.FC<ModelProps> = ({
 	onPositionUpdate,
 	id,
 }) => {
+	const isMobile = useMemo(
+		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+		[]
+	);
+
 	const { setIsEnabled: setCameraEnabled } = useCameraContext();
 	const { camera, raycaster, pointer } = useThree();
 	const [showDescription, setShowDescription] = useState(false);
@@ -136,6 +142,7 @@ export const Model: React.FC<ModelProps> = ({
 
 	const objLoader = useMemo(() => new OBJLoader(), []);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
+	const gltfLoader = useMemo(() => new GLTFLoader(), []);
 	const [model, setModel] = useState<THREE.Object3D | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
@@ -169,7 +176,7 @@ export const Model: React.FC<ModelProps> = ({
 					currentPosition.z,
 				]);
 			}
-		}, 2000);
+		}, 1000);
 
 		return () => clearInterval(intervalId);
 	}, [id, onPositionUpdate, isDragging]);
@@ -321,6 +328,18 @@ export const Model: React.FC<ModelProps> = ({
 						applyColorToModel(extrudedModel, color, config);
 					}
 					setModel(extrudedModel);
+				} else if (config.type === "glb") {
+					const loadedGLTF = await gltfLoader.loadAsync(
+						config.glbPath
+					);
+					if ((color && config.randomizeColor) || config.color) {
+						applyColorToModel(
+							loadedGLTF.scene,
+							config.color || color,
+							config
+						);
+					}
+					setModel(loadedGLTF.scene);
 				}
 			} catch (err) {
 				console.error(`Error loading model ${config.id}:`, err);
@@ -329,7 +348,7 @@ export const Model: React.FC<ModelProps> = ({
 		};
 
 		loadModel();
-	}, [config, color, objLoader, svgLoader]);
+	}, [config, color, objLoader, svgLoader, gltfLoader]);
 
 	if (error) return null;
 	if (!model) return null;
@@ -359,7 +378,7 @@ export const Model: React.FC<ModelProps> = ({
 				>
 					<primitive
 						object={model}
-						scale={config.scale ?? 1}
+						scale={config.scale ?? 1 * (isMobile ? 1.4 : 1)}
 						receiveShadow
 						castShadow
 					/>

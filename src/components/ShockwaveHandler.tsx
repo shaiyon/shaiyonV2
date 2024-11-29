@@ -6,7 +6,7 @@ import { usePauseContext } from "../contexts/PauseContext";
 import { defaultFloorProps } from "./floors/types";
 
 // Constants for shockwave behavior
-const SHOCKWAVE_RADIUS = 4;
+const SHOCKWAVE_RADIUS = 5;
 const SHOCKWAVE_FORCE = 3;
 const SHOCKWAVE_UPLIFT = 2;
 const MIN_FORCE = 1;

@@ -45,7 +45,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 25,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Certified Solutions Architect",
+		hoverText: "AWS Certified Solutions Architect",
 	},
 	{
 		id: "gcp",
@@ -85,7 +85,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 75,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Contribute to TypeScript codebases",
+		hoverText: "Contribute to TypeScript projects",
 	},
 	{
 		id: "docker",
@@ -105,5 +105,13 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		randomizeColor: false,
 		hoverText: "Architect AI systems",
 		color: "#FF91AF",
+	},
+	{
+		id: "book",
+		type: "glb",
+		glbPath: "/models/book.glb",
+		scale: 0.5,
+		randomizeColor: false,
+		hoverText: "Education in Stats, Econ, & CS",
 	},
 ];

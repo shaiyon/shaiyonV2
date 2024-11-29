@@ -1,56 +1,97 @@
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useState, useEffect, useMemo } from "react";
-import { RefreshCw } from "lucide-react";
-
+import { useState, useEffect, useMemo, useRef } from "react";
+import { RefreshCw, Target } from "lucide-react";
 import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
 import { PauseProvider } from "./contexts/PauseContext";
 import { Scene } from "./components/Scene";
 import { AssetLoader } from "./AssetLoader";
 import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
+import {
+	PerformanceMonitor,
+	PerformanceStats,
+} from "./components/PerformanceMonitor";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-const Controls = () => {
+interface ControlsProps {
+	controlsRef: React.RefObject<OrbitControlsImpl>;
+}
+
+const Controls = ({ controlsRef }: ControlsProps) => {
 	const { isEnabled } = useCameraContext();
-	const isMobile = useMemo(
-		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
-		[]
-	);
 
 	return (
 		<OrbitControls
-			enablePan={false}
+			ref={controlsRef}
+			enablePan={true}
 			enableZoom={isEnabled}
 			enableRotate={isEnabled}
 			rotateSpeed={1}
-			maxDistance={isMobile ? 15 : 10}
+			maxDistance={20}
 			minPolarAngle={Math.PI / 6}
-			maxPolarAngle={Math.PI / 1.95}
+			maxPolarAngle={Math.PI / 1.9}
 			mouseButtons={{
 				LEFT: 0,
 				MIDDLE: 1,
+			}}
+			touches={{
+				ONE: 0,
+				TWO: 2,
 			}}
 		/>
 	);
 };
 
-const ResetButton = () => {
+interface ActionButtonsProps {
+	defaultCameraPosition: [number, number, number];
+	controlsRef: React.RefObject<OrbitControlsImpl>;
+}
+
+const ActionButtons = ({
+	defaultCameraPosition,
+	controlsRef,
+}: ActionButtonsProps) => {
 	const handleReset = () => {
 		window.location.reload();
 	};
 
+	const handleCenterCamera = () => {
+		if (controlsRef.current) {
+			controlsRef.current.reset();
+			controlsRef.current.object.position.set(
+				defaultCameraPosition[0],
+				defaultCameraPosition[1],
+				defaultCameraPosition[2]
+			);
+		}
+	};
+
+	const buttonClasses =
+		"p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-colors duration-200 z-10";
+
 	return (
-		<button
-			onClick={handleReset}
-			className="absolute top-4 right-4 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-colors duration-200 z-10"
-			aria-label="Reset Scene"
-		>
-			<RefreshCw size={24} />
-		</button>
+		<div className="absolute top-4 right-4 flex flex-col gap-2">
+			<button
+				onClick={handleReset}
+				className={buttonClasses}
+				aria-label="Reset Scene"
+			>
+				<RefreshCw size={20} />
+			</button>
+			<button
+				onClick={handleCenterCamera}
+				className={buttonClasses}
+				aria-label="Center Camera"
+			>
+				<Target size={20} />
+			</button>
+		</div>
 	);
 };
 
 export const App = () => {
+	const controlsRef = useRef<OrbitControlsImpl>(null);
 	const isMobile = useMemo(
 		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
 		[]
@@ -66,7 +107,6 @@ export const App = () => {
 		const handleVisibilityChange = () => {
 			setIsPageVisible(!document.hidden);
 		};
-
 		const handleBlur = () => setIsPageVisible(false);
 		const handleFocus = () => setIsPageVisible(true);
 
@@ -90,7 +130,13 @@ export const App = () => {
 
 	return (
 		<div className="w-screen h-screen">
-			<ResetButton />
+			<ActionButtons
+				defaultCameraPosition={
+					defaultCameraPosition as [number, number, number]
+				}
+				controlsRef={controlsRef}
+			/>
+			<PerformanceMonitor />
 			<CameraProvider>
 				<PauseProvider isPaused={!isPageVisible}>
 					<AssetLoader
@@ -105,11 +151,12 @@ export const App = () => {
 									fov: 75,
 								}}
 							>
-								<Controls />
+								<Controls controlsRef={controlsRef} />
 								<Physics
 									paused={!isPageVisible}
 									timeStep={isPageVisible ? 1 / 60 : 0}
 								>
+									<PerformanceStats /> Inside Canvas
 									<Scene
 										selectedTextures={selectedTextures}
 									/>
