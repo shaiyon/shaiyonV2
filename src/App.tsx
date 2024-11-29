@@ -74,14 +74,18 @@ const ResetButton = () => {
 
 const Controls = () => {
 	const { isEnabled } = useCameraContext();
+	const isMobile = useMemo(
+		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+		[]
+	);
 
 	return (
 		<OrbitControls
 			enablePan={false}
 			enableZoom={isEnabled}
 			enableRotate={isEnabled}
-			rotateSpeed={0.75}
-			maxDistance={10}
+			rotateSpeed={1}
+			maxDistance={isMobile ? 15 : 10}
 			minPolarAngle={Math.PI / 6}
 			maxPolarAngle={Math.PI / 1.95}
 			mouseButtons={{
@@ -97,7 +101,7 @@ const App = () => {
 		() => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
 		[]
 	);
-	const defaultCameraPosition = isMobile ? [0, 4, 12] : [0, 2, 8];
+	const defaultCameraPosition = isMobile ? [0, 4, 14] : [0, 2, 8];
 	const [isPageVisible, setIsPageVisible] = useState(true);
 
 	useEffect(() => {

@@ -7,7 +7,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		path: "/models/california.obj",
 		scale: 0.4,
 		randomizeColor: true,
-		hoverText: "Born and raised in the Bay Area, CA",
+		hoverText: "From the Bay Area, CA",
 	},
 	{
 		id: "newyork",

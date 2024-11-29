@@ -249,8 +249,8 @@ export const Model: React.FC<ModelProps> = ({
 					const dz = targetPos.z - currentPos.z;
 
 					// Speed increases with distance (capped at maxSpeed)
-					const maxSpeed = 30;
-					const distanceMultiplier = 5;
+					const maxSpeed = 15;
+					const distanceMultiplier = 3;
 					const vx = Math.min(
 						Math.max(dx * distanceMultiplier, -maxSpeed),
 						maxSpeed
@@ -349,6 +349,8 @@ export const Model: React.FC<ModelProps> = ({
 				}
 				restitution={0.3}
 				friction={0.8}
+				linearDamping={0.5}
+				angularDamping={0.5}
 				mass={config.id === "brain" ? 5 : 1}
 			>
 				<group onPointerDown={handlePointerDown}>

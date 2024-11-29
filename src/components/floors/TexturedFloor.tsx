@@ -69,17 +69,24 @@ const TexturedFloor: React.FC<TexturedFloorProps> = ({
 		}
 	});
 
+	// Combine the original tilt with the plane's rotation
+	const floorRotation: [number, number, number] = [
+		-Math.PI / 2 + rotation[0],
+		rotation[1],
+		rotation[2],
+	];
+
 	return (
-		<RigidBody type="fixed" position={position} rotation={rotation}>
+		<RigidBody type="fixed" position={position} rotation={floorRotation}>
 			<mesh receiveShadow>
-				{/* <cylinderGeometry args={[10, 10, 0.5, 64]} />{" "} */}
-				<boxGeometry args={[20, 0.5, 20]} />
+				<planeGeometry args={[20, 20]} />
 				<meshStandardMaterial
 					{...textures}
 					normalScale={new THREE.Vector2(0.5, 0.5)}
 					roughness={0.8}
 					metalness={0.0}
 					displacementScale={0.1}
+					side={THREE.DoubleSide}
 				/>
 			</mesh>
 		</RigidBody>
