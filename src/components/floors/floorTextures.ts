@@ -1,4 +1,3 @@
-// floorTextures.ts
 export const FLOOR_TEXTURE_SETS = {
 	CLAY_ROOF: {
 		diff: "/textures/clay_roof_tiles_02_diff_1k.jpg",

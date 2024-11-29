@@ -8,7 +8,7 @@ import { usePauseContext } from "../contexts/PauseContext";
 import { defaultFloorProps } from "./floors/types";
 import type { SphereTextureType } from "../textureTypes";
 
-export const TEXTURE_SETS = {
+export const SPHERE_TEXTURE_SETS = {
 	RUBBER: {
 		diff: "/textures/rubberized_track_diff_1k.jpg",
 		disp: "/textures/rubberized_track_disp_1k.png",
@@ -43,7 +43,7 @@ interface TexturedSphereMaterialProps {
 const TexturedSphereMaterial: React.FC<TexturedSphereMaterialProps> = ({
 	textureType,
 }) => {
-	const textureSet = TEXTURE_SETS[textureType];
+	const textureSet = SPHERE_TEXTURE_SETS[textureType];
 	const textures = useTexture({
 		map: textureSet.diff,
 		displacementMap: textureSet.disp,
