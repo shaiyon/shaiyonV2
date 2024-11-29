@@ -134,22 +134,18 @@ export const createExtrudedGeometry = (
 		shapes.forEach((shape: Shape) => {
 			const geometry = new ExtrudeGeometry(shape, {
 				depth: depth,
-				bevelEnabled: true,
-				bevelThickness: depth * 0.1,
-				bevelSize: depth * 0.1,
-				bevelSegments: 3,
+				bevelEnabled: false,
 			});
-
 			const material = new MeshStandardMaterial({
 				color: pathColor,
 				metalness: 0.05,
 				roughness: 0.9,
-				side: THREE.DoubleSide,
+				side: THREE.FrontSide,
 				flatShading: true,
 			});
 
 			const mesh = new Mesh(geometry, material);
-			mesh.position.z += group.children.length * 0.001;
+			mesh.position.z += group.children.length * 0.1;
 			group.add(mesh);
 		});
 	});

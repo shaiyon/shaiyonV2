@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Target } from "lucide-react";
+import { RefreshCw, Crosshair } from "lucide-react";
 
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Canvas } from "@react-three/fiber";
@@ -31,7 +31,7 @@ const Controls = ({ controlsRef }: ControlsProps) => {
 			enableZoom={isEnabled}
 			enableRotate={isEnabled}
 			rotateSpeed={1}
-			minDistance={1}
+			minDistance={0.5}
 			maxDistance={15}
 			minPolarAngle={Math.PI / 6}
 			maxPolarAngle={Math.PI / 1.9}
@@ -88,7 +88,7 @@ const ActionButtons = ({
 				className={buttonClasses}
 				aria-label="Center Camera"
 			>
-				<Target size={20} />
+				<Crosshair size={20} />
 			</button>
 		</div>
 	);
