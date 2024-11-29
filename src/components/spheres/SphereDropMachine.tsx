@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import * as THREE from "three";
 import { RigidBody } from "@react-three/rapier";
 import { useTexture } from "@react-three/drei";
-
 import { SPHERE_TEXTURE_SETS } from "./sphereTextures";
 import type { SphereTextureType } from "../../textureTypes";
 import { usePauseContext } from "../../contexts/PauseContext";
 
-const MAX_SPHERES = 50;
+const MAX_SPHERES = 75;
 const SPAWN_INTERVAL = 0.2 * 1000;
+const CLEANUP_INTERVAL = 1 * 1000;
+const Y_THRESHOLD = -5;
 
 interface Sphere {
 	id: number;
@@ -89,25 +90,33 @@ export const SphereDropMachine = ({
 	useEffect(() => {
 		if (isPaused) return;
 
-		const fallInterval = setInterval(spawnFallingSphere, SPAWN_INTERVAL);
+		const spawnInterval = setInterval(spawnFallingSphere, SPAWN_INTERVAL);
+
 		const cleanupInterval = setInterval(() => {
-			setSpheres((prev) =>
-				prev.filter((sphere) => sphere.position[1] > -5)
-			);
+			console.log(`sphere count ${spheres.length}`);
 
-			if (spheres.length > MAX_SPHERES) {
-				setSpheres((prev) => prev.slice(-MAX_SPHERES));
-			}
-		}, 1000);
+			setSpheres((prev) => {
+				const remainingSpheres = prev.filter(
+					(sphere) => sphere.position[1] > Y_THRESHOLD
+				);
 
-		document.addEventListener("contextmenu", (e) => e.preventDefault());
+				// If we're over MAX_SPHERES, remove the oldest ones
+				if (remainingSpheres.length > MAX_SPHERES) {
+					return remainingSpheres.slice(-MAX_SPHERES);
+				}
+
+				return remainingSpheres;
+			});
+		}, CLEANUP_INTERVAL);
+
+		// Prevent context menu
+		const handleContextMenu = (e: Event) => e.preventDefault();
+		document.addEventListener("contextmenu", handleContextMenu);
 
 		return () => {
-			clearInterval(fallInterval);
+			clearInterval(spawnInterval);
 			clearInterval(cleanupInterval);
-			document.removeEventListener("contextmenu", (e) =>
-				e.preventDefault()
-			);
+			document.removeEventListener("contextmenu", handleContextMenu);
 		};
 	}, [isPaused, spheres.length]);
 
