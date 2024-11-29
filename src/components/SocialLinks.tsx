@@ -1,7 +1,8 @@
 import { useRef, useState, useMemo, useEffect } from "react";
+
+import { Group, Vector3, CircleGeometry, MeshBasicMaterial } from "three";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import { Group, Vector3 } from "three";
 import { SVGLoader } from "three-stdlib";
 
 import {
@@ -40,10 +41,8 @@ const SOCIAL_CONFIGS: SocialIconConfig[] = [
 
 const createExtrudedGeometry = (svgData: any, depth: number = 50) => {
 	const group = new Group();
-
 	svgData.paths.forEach((path: any) => {
 		const shapes = path.toShapes(true);
-
 		shapes.forEach((shape: Shape) => {
 			const geometry = new ExtrudeGeometry(shape, {
 				depth: depth,
@@ -52,18 +51,15 @@ const createExtrudedGeometry = (svgData: any, depth: number = 50) => {
 				bevelSize: depth * 0.1,
 				bevelSegments: 3,
 			});
-
 			const material = new MeshStandardMaterial({
 				color: new Color(0x000000),
 				metalness: 0.1,
 				roughness: 0.8,
 			});
-
 			const mesh = new Mesh(geometry, material);
 			group.add(mesh);
 		});
 	});
-
 	return group;
 };
 
@@ -73,6 +69,7 @@ interface SocialIconProps {
 
 const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 	const groupRef = useRef<Group>(null);
+	const hitboxRef = useRef<Mesh>(null);
 	const [hovered, setHovered] = useState(false);
 	const [model, setModel] = useState<Object3D | null>(null);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
@@ -123,20 +120,14 @@ const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 
 	if (!model) return null;
 
+	// Create circular hitbox geometry
+	const hitboxGeometry = new CircleGeometry(1, 30);
+	const hitboxMaterial = new MeshBasicMaterial({
+		visible: false, // Make the hitbox invisible
+	});
+
 	return (
-		<group
-			position={config.position}
-			ref={groupRef}
-			onClick={() => window.open(config.url, "_blank")}
-			onPointerOver={() => {
-				document.body.style.cursor = "pointer";
-				setHovered(true);
-			}}
-			onPointerOut={() => {
-				document.body.style.cursor = "auto";
-				setHovered(false);
-			}}
-		>
+		<group position={config.position} ref={groupRef}>
 			<primitive
 				object={model}
 				scale={config.scale}
@@ -144,6 +135,39 @@ const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 				receiveShadow
 				castShadow
 			/>
+			{config.id === "github" && (
+				<mesh
+					ref={hitboxRef}
+					geometry={hitboxGeometry}
+					material={hitboxMaterial}
+					scale={0.5} // Adjust this value to change hitbox size
+					onClick={() => window.open(config.url, "_blank")}
+					onPointerOver={() => {
+						document.body.style.cursor = "pointer";
+						setHovered(true);
+					}}
+					onPointerOut={() => {
+						document.body.style.cursor = "auto";
+						setHovered(false);
+					}}
+				/>
+			)}
+			{config.id !== "github" && (
+				<primitive
+					object={model}
+					scale={config.scale}
+					rotation={[Math.PI, 0, 0]}
+					onClick={() => window.open(config.url, "_blank")}
+					onPointerOver={() => {
+						document.body.style.cursor = "pointer";
+						setHovered(true);
+					}}
+					onPointerOut={() => {
+						document.body.style.cursor = "auto";
+						setHovered(false);
+					}}
+				/>
+			)}
 		</group>
 	);
 };
