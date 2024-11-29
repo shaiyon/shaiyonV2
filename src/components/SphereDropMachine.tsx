@@ -88,32 +88,16 @@ interface SphereDropMachineProps {
 	selectedTextureType: SphereTextureType;
 }
 
-export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
+export const SphereDropMachine = ({
 	selectedTextureType,
-}) => {
+}: SphereDropMachineProps) => {
 	const { isPaused } = usePauseContext();
 	const [spheres, setSpheres] = useState<Sphere[]>([]);
 	const { camera, raycaster, pointer } = useThree();
 
-	// Regular falling spheres
-	const spawnFallingSphere = () => {
-		const randomX = Math.random() * 6 - 3;
-
-		setSpheres((prev) => [
-			...prev,
-			{
-				id: Date.now(),
-				position: [randomX, 12, -1],
-				velocity: [0, -0.1, 0],
-			},
-		]);
-	};
-
-	// Impact spheres
 	const createImpactSpheres = (impactPoint: Vector3) => {
 		if (isPaused) return;
 
-		// Ensure the impact point is slightly above the floor
 		const floorY = defaultFloorProps.position[1];
 		const adjustedY = Math.max(impactPoint.y, floorY + 0.5);
 
@@ -137,22 +121,20 @@ export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
 		setSpheres((prev) => [...prev, ...newSpheres]);
 	};
 
-	const handleSceneClick = (event: MouseEvent) => {
-		if (!event || event.defaultPrevented) return;
+	const handleClick = (event: MouseEvent) => {
+		if (!event || event.defaultPrevented || event.button !== 2) return;
+		event.preventDefault();
 
 		raycaster.setFromCamera(pointer, camera);
 
-		// Create transformation matrix for the floor
 		const floorMatrix = new Matrix4();
 		const floorEuler = new Euler(...defaultFloorProps.rotation);
 		floorMatrix.makeRotationFromEuler(floorEuler);
 		floorMatrix.setPosition(new Vector3(...defaultFloorProps.position));
 
-		// Create and transform floor plane
 		const floorPlane = new Plane(new Vector3(0, 1, 0));
 		floorPlane.applyMatrix4(floorMatrix);
 
-		// Find intersection with transformed floor plane
 		const intersectionPoint = new Vector3();
 		const intersected = raycaster.ray.intersectPlane(
 			floorPlane,
@@ -162,38 +144,48 @@ export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
 		if (intersected) {
 			createImpactSpheres(intersectionPoint);
 		} else {
-			// Fallback: project ray to reasonable distance
 			const point = raycaster.ray.at(10, new Vector3());
 			point.y = defaultFloorProps.position[1] + 0.5;
 			createImpactSpheres(point);
 		}
 	};
 
-	const cleanupSpheres = () => {
-		setSpheres((prev) =>
-			prev.filter((sphere) => {
-				const posY = sphere.position[1];
-				return posY > -10;
-			})
-		);
-
-		if (spheres.length > 100) {
-			setSpheres((prev) => prev.slice(-100));
-		}
+	const spawnFallingSphere = () => {
+		const randomX = Math.random() * 6 - 3;
+		setSpheres((prev) => [
+			...prev,
+			{
+				id: Date.now(),
+				position: [randomX, 12, -1],
+				velocity: [0, -0.1, 0],
+			},
+		]);
 	};
 
 	useEffect(() => {
 		if (isPaused) return;
 
 		const fallInterval = setInterval(spawnFallingSphere, 200);
-		const cleanupInterval = setInterval(cleanupSpheres, 1000);
+		const cleanupInterval = setInterval(() => {
+			setSpheres((prev) =>
+				prev.filter((sphere) => sphere.position[1] > -10)
+			);
 
-		document.addEventListener("click", handleSceneClick);
+			if (spheres.length > 100) {
+				setSpheres((prev) => prev.slice(-100));
+			}
+		}, 1000);
+
+		document.addEventListener("mousedown", handleClick);
+		document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 		return () => {
 			clearInterval(fallInterval);
 			clearInterval(cleanupInterval);
-			document.removeEventListener("click", handleSceneClick);
+			document.removeEventListener("mousedown", handleClick);
+			document.removeEventListener("contextmenu", (e) =>
+				e.preventDefault()
+			);
 		};
 	}, [isPaused]);
 

@@ -1,5 +1,5 @@
-import { useTexture } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
+import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import type { FloorProps } from "./types";
 import { FLOOR_TEXTURE_SETS } from "./floorTextures";
@@ -16,16 +16,12 @@ const TexturedFloor: React.FC<TexturedFloorProps> = ({
 	textureSet,
 }) => {
 	const texturePaths = FLOOR_TEXTURE_SETS[textureSet];
-
 	const textures = useTexture({
 		map: texturePaths.diff,
 		displacementMap: texturePaths.disp,
 		normalMap: texturePaths.normal,
 		roughnessMap: texturePaths.rough,
 	});
-
-	// Add console.log to debug texture loading
-	console.log("Loading textures for:", textureSet, textures);
 
 	Object.values(textures).forEach((texture) => {
 		if (texture) {
@@ -37,17 +33,23 @@ const TexturedFloor: React.FC<TexturedFloorProps> = ({
 		}
 	});
 
-	// Combine the original tilt with the plane's rotation
 	const floorRotation: [number, number, number] = [
-		-Math.PI / 2 + rotation[0],
+		rotation[0],
 		rotation[1],
 		rotation[2],
 	];
-
 	return (
-		<RigidBody type="fixed" position={position} rotation={floorRotation}>
+		<RigidBody
+			type="fixed"
+			position={position}
+			rotation={floorRotation}
+			friction={1.0}
+			restitution={0.2}
+			colliders="cuboid"
+		>
 			<mesh receiveShadow>
-				<planeGeometry args={[20, 20]} />
+				{/* Using a BoxGeometry for better collision */}
+				<boxGeometry args={[20, 0.2, 20]} />
 				<meshStandardMaterial
 					{...textures}
 					normalScale={new THREE.Vector2(0.5, 0.5)}

@@ -353,7 +353,10 @@ export const Model: React.FC<ModelProps> = ({
 				angularDamping={0.5}
 				mass={config.id === "brain" ? 5 : 1}
 			>
-				<group onPointerDown={handlePointerDown}>
+				<group
+					onPointerDown={handlePointerDown}
+					userData={{ isDraggableModel: true }} // Add this line
+				>
 					<primitive
 						object={model}
 						scale={config.scale ?? 1}

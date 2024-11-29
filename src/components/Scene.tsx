@@ -2,6 +2,7 @@ import { Environment, Sky } from "@react-three/drei";
 import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+
 import { loadFloor } from "./floors";
 import { defaultFloorProps } from "./floors/types";
 import { FloatingText } from "./FloatingText";
@@ -9,6 +10,7 @@ import { SocialLinks } from "./SocialLinks";
 import { SphereDropMachine } from "./SphereDropMachine";
 import { ModelDropMachine } from "./models/ModelDropMachine";
 import type { SelectedTextures } from "../textureTypes";
+import { ShockwaveHandler } from "./ShockwaveHandler";
 
 interface SceneProps {
 	selectedTextures: SelectedTextures;
@@ -67,6 +69,7 @@ export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
 			<Environment preset="city" />
 			<ambientLight intensity={0.5} />
 			<directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+			<ShockwaveHandler />
 			<FloatingText />
 			<SocialLinks />
 			<SphereDropMachine

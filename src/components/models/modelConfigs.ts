@@ -45,7 +45,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 25,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "AWS Certified Solutions Architect",
+		hoverText: "Certified Solutions Architect",
 	},
 	{
 		id: "gcp",
