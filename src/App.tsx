@@ -28,7 +28,8 @@ const Controls = ({ controlsRef }: ControlsProps) => {
 			enableZoom={isEnabled}
 			enableRotate={isEnabled}
 			rotateSpeed={1}
-			maxDistance={20}
+			minDistance={1}
+			maxDistance={15}
 			minPolarAngle={Math.PI / 6}
 			maxPolarAngle={Math.PI / 1.9}
 			mouseButtons={{
