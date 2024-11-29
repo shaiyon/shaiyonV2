@@ -33,10 +33,6 @@ export const FloatingText = () => {
 							metalness={0.1}
 							roughness={0.2}
 						/>
-						<lineSegments>
-							<edgesGeometry />
-							<lineBasicMaterial color="white" linewidth={2} />
-						</lineSegments>
 					</Text3D>
 				</RigidBody>
 			</Center>
@@ -55,10 +51,6 @@ export const FloatingText = () => {
 							metalness={0.1}
 							roughness={0.2}
 						/>
-						<lineSegments>
-							<edgesGeometry />
-							<lineBasicMaterial color="white" linewidth={100} />
-						</lineSegments>
 					</Text3D>
 				</RigidBody>
 			</Center>
