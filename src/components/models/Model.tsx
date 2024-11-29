@@ -359,7 +359,7 @@ export const Model: React.FC<ModelProps> = ({
 				>
 					<primitive
 						object={model}
-						scale={config.scale ?? 1 * (isMobile ? 1.4 : 1)}
+						scale={config.scale ?? 1 * (isMobile ? 2 : 1)}
 						receiveShadow
 						castShadow
 					/>

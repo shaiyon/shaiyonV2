@@ -8,10 +8,10 @@ import { PauseProvider } from "./contexts/PauseContext";
 import { Scene } from "./components/Scene";
 import { AssetLoader } from "./AssetLoader";
 import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
-import {
-	PerformanceMonitor,
-	PerformanceStats,
-} from "./components/PerformanceMonitor";
+// import {
+// 	PerformanceMonitor,
+// 	PerformanceStats,
+// } from "./components/PerformanceMonitor";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 interface ControlsProps {
@@ -130,14 +130,14 @@ export const App = () => {
 	};
 
 	return (
-		<div className="w-screen h-screen">
+		<div className="w-screen h-screen select-none touch-none">
 			<ActionButtons
 				defaultCameraPosition={
 					defaultCameraPosition as [number, number, number]
 				}
 				controlsRef={controlsRef}
 			/>
-			<PerformanceMonitor />
+			{/* <PerformanceMonitor /> */}
 			<CameraProvider>
 				<PauseProvider isPaused={!isPageVisible}>
 					<AssetLoader
@@ -157,7 +157,7 @@ export const App = () => {
 									paused={!isPageVisible}
 									timeStep={isPageVisible ? 1 / 60 : 0}
 								>
-									<PerformanceStats /> Inside Canvas
+									{/* <PerformanceStats /> Inside Canvas */}
 									<Scene
 										selectedTextures={selectedTextures}
 									/>
