@@ -44,33 +44,16 @@ const ModelDescription = ({
 	const [opacity, setOpacity] = useState(1);
 	const fadeStartTimeRef = useRef(Date.now());
 	const textRef = useRef<any>(null);
-	const initialRotationRef = useRef<THREE.Euler | null>(null);
 
-	// Set initial rotation and center text when component mounts
+	// Center the text only once when it's first created
 	useEffect(() => {
-		if (textRef.current && !initialRotationRef.current) {
-			// Set initial camera-facing rotation
-			const lookDirection = new THREE.Vector3();
-			camera.getWorldDirection(lookDirection);
-			const euler = new THREE.Euler();
-			euler.setFromQuaternion(
-				new THREE.Quaternion().setFromRotationMatrix(
-					new THREE.Matrix4().lookAt(
-						new THREE.Vector3(0, 0, 0),
-						lookDirection,
-						new THREE.Vector3(0, 1, 0)
-					)
-				)
-			);
-			initialRotationRef.current = euler;
-
-			// Center the text by computing its bounding box
+		if (textRef.current) {
 			const bbox = new THREE.Box3().setFromObject(textRef.current);
 			const offset = new THREE.Vector3();
 			bbox.getSize(offset);
 			textRef.current.geometry.translate(-offset.x / 2, -0.5, 0);
 		}
-	}, [camera]);
+	}, []);
 
 	useEffect(() => {
 		if (isDragging) {
@@ -85,10 +68,8 @@ const ModelDescription = ({
 			const pos = rigidBodyRef.current.translation();
 			textRef.current.position.set(pos.x, pos.y + 1, pos.z);
 
-			// Apply initial rotation if we have it
-			if (initialRotationRef.current) {
-				textRef.current.rotation.copy(initialRotationRef.current);
-			}
+			// Make text face camera every frame
+			textRef.current.quaternion.copy(camera.quaternion);
 
 			if (!isDragging) {
 				const elapsedTime =
