@@ -24,4 +24,10 @@ export const FLOOR_TEXTURE_SETS = {
 		normal: "/textures/concrete_layers_nor_gl_1k.png",
 		rough: "/textures/concrete_layers_rough_1k.png",
 	},
+	ROCKY_TERRAIN: {
+		diff: "/textures/rocky_terrain_diff_1k.jpg",
+		disp: "/textures/rocky_terrain_disp_1k.png",
+		normal: "/textures/rocky_terrain_nor_gl_1k.png",
+		rough: "/textures/rocky_terrain_rough_1k.png",
+	},
 } as const;
