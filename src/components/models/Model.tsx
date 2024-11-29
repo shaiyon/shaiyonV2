@@ -6,13 +6,16 @@ import React, {
 	useCallback,
 } from "react";
 import { OBJLoader, SVGLoader } from "three-stdlib";
+import * as THREE from "three";
+import { Vector3, Matrix4, Euler, Plane } from "three";
+
 import {
 	RigidBody,
 	type RigidBody as RigidBodyType,
 } from "@react-three/rapier";
-import { useThree } from "@react-three/fiber";
-import * as THREE from "three";
-import { Vector3, Matrix4, Euler, Plane } from "three";
+import { useThree, useFrame } from "@react-three/fiber";
+import { Text3D } from "@react-three/drei";
+
 import { useCameraContext } from "../../contexts/CameraContext";
 import { defaultFloorProps } from "../floors/types";
 import { ModelConfig, SVGModelConfig } from "./types";
@@ -27,22 +30,114 @@ interface ModelProps {
 	id: number;
 }
 
-export const Model: React.FC<{
-	config: ModelConfig;
-	position: [number, number, number];
-	rotation: [number, number, number];
-	color?: string;
-	onPositionUpdate: (id: number, position: [number, number, number]) => void;
-	id: number;
-}> = ({ config, position, rotation, color, onPositionUpdate, id }) => {
+const ModelDescription = ({
+	text,
+	rigidBodyRef,
+	isDragging,
+}: {
+	text: string;
+	rigidBodyRef: React.RefObject<RigidBodyType>;
+	isDragging: boolean;
+}) => {
+	const { camera } = useThree();
+	const [opacity, setOpacity] = useState(1);
+	const fadeStartTimeRef = useRef(Date.now());
+	const textRef = useRef<any>(null);
+	const initialRotationRef = useRef<THREE.Euler | null>(null);
+
+	// Set initial rotation and center text when component mounts
+	useEffect(() => {
+		if (textRef.current && !initialRotationRef.current) {
+			// Set initial camera-facing rotation
+			const lookDirection = new THREE.Vector3();
+			camera.getWorldDirection(lookDirection);
+			const euler = new THREE.Euler();
+			euler.setFromQuaternion(
+				new THREE.Quaternion().setFromRotationMatrix(
+					new THREE.Matrix4().lookAt(
+						new THREE.Vector3(0, 0, 0),
+						lookDirection,
+						new THREE.Vector3(0, 1, 0)
+					)
+				)
+			);
+			initialRotationRef.current = euler;
+
+			// Center the text by computing its bounding box
+			const bbox = new THREE.Box3().setFromObject(textRef.current);
+			const offset = new THREE.Vector3();
+			bbox.getSize(offset);
+			textRef.current.geometry.translate(-offset.x / 2, -0.5, 0);
+		}
+	}, [camera]);
+
+	useEffect(() => {
+		if (isDragging) {
+			setOpacity(1);
+		} else {
+			fadeStartTimeRef.current = Date.now();
+		}
+	}, [isDragging]);
+
+	useFrame(() => {
+		if (textRef.current && rigidBodyRef.current) {
+			const pos = rigidBodyRef.current.translation();
+			textRef.current.position.set(pos.x, pos.y + 1, pos.z);
+
+			// Apply initial rotation if we have it
+			if (initialRotationRef.current) {
+				textRef.current.rotation.copy(initialRotationRef.current);
+			}
+
+			if (!isDragging) {
+				const elapsedTime =
+					(Date.now() - fadeStartTimeRef.current) / 1000;
+				if (elapsedTime > 3) {
+					setOpacity((prev) => Math.max(0, prev - 0.05));
+				}
+			}
+		}
+	});
+
+	if (opacity <= 0) return null;
+
+	return (
+		<Text3D
+			ref={textRef}
+			font="/fonts/helvetiker_regular.json"
+			size={0.3}
+			height={0.06}
+			curveSegments={12}
+		>
+			{text}
+			<meshStandardMaterial
+				color="black"
+				transparent
+				opacity={opacity}
+				metalness={0.1}
+				roughness={0.2}
+			/>
+		</Text3D>
+	);
+};
+
+export const Model: React.FC<ModelProps> = ({
+	config,
+	position,
+	rotation,
+	color,
+	onPositionUpdate,
+	id,
+}) => {
 	const { setIsEnabled: setCameraEnabled } = useCameraContext();
 	const { camera, raycaster, pointer } = useThree();
+	const [showDescription, setShowDescription] = useState(false);
+	const rigidBodyRef = useRef<RigidBodyType>(null);
 
 	const objLoader = useMemo(() => new OBJLoader(), []);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
 	const [model, setModel] = useState<THREE.Object3D | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const rigidBodyRef = useRef<RigidBodyType>(null);
 
 	// Dragging state
 	const [isDragging, setIsDragging] = useState(false);
@@ -64,7 +159,6 @@ export const Model: React.FC<{
 		return plane;
 	}, [floorMatrix]);
 
-	// Update position for respawning
 	useEffect(() => {
 		const intervalId = setInterval(() => {
 			if (rigidBodyRef.current && !isDragging) {
@@ -80,22 +174,22 @@ export const Model: React.FC<{
 		return () => clearInterval(intervalId);
 	}, [id, onPositionUpdate, isDragging]);
 
-	// Handle dragging
 	const handlePointerDown = (e: any) => {
 		e.stopPropagation();
+		if (config.hoverText) {
+			setShowDescription(true);
+		}
+
 		if (rigidBodyRef.current) {
 			setIsDragging(true);
 			setCameraEnabled(false);
 
-			// Store the initial position
 			const currentPos = rigidBodyRef.current.translation();
 			dragStartPosition.current.set(
 				currentPos.x,
 				currentPos.y,
 				currentPos.z
 			);
-
-			// Calculate and store the initial offset from the click point
 			dragStartOffset.current.set(
 				currentPos.x - e.point.x,
 				currentPos.y - e.point.y,
@@ -208,8 +302,12 @@ export const Model: React.FC<{
 			try {
 				if (config.type === "obj") {
 					const loadedModel = await objLoader.loadAsync(config.path);
-					if (color && config.randomizeColor) {
-						applyColorToModel(loadedModel, color, config);
+					if ((color && config.randomizeColor) || config.color) {
+						applyColorToModel(
+							loadedModel,
+							config.color || color,
+							config
+						);
 					}
 					setModel(loadedModel);
 				} else if (config.type === "svg") {
@@ -237,22 +335,39 @@ export const Model: React.FC<{
 	if (!model) return null;
 
 	return (
-		<RigidBody
-			ref={rigidBodyRef}
-			position={position}
-			rotation={rotation}
-			colliders="hull"
-			restitution={0.3}
-			friction={0.8}
-		>
-			<group onPointerDown={handlePointerDown}>
-				<primitive
-					object={model}
-					scale={config.scale ?? 1}
-					receiveShadow
-					castShadow
+		<>
+			<RigidBody
+				ref={rigidBodyRef}
+				position={position}
+				rotation={rotation}
+				colliders={
+					config.id === "brain"
+						? "cuboid"
+						: config.type === "obj"
+						? "hull"
+						: "cuboid"
+				}
+				restitution={0.3}
+				friction={0.8}
+				mass={config.id === "brain" ? 5 : 1}
+			>
+				<group onPointerDown={handlePointerDown}>
+					<primitive
+						object={model}
+						scale={config.scale ?? 1}
+						receiveShadow
+						castShadow
+					/>
+				</group>
+			</RigidBody>
+
+			{showDescription && config.hoverText && (
+				<ModelDescription
+					text={config.hoverText}
+					rigidBodyRef={rigidBodyRef}
+					isDragging={isDragging}
 				/>
-			</group>
-		</RigidBody>
+			)}
+		</>
 	);
 };

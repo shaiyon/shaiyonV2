@@ -7,6 +7,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		path: "/models/california.obj",
 		scale: 0.4,
 		randomizeColor: true,
+		hoverText: "Born and raised in the Bay Area, CA",
 	},
 	{
 		id: "newyork",
@@ -14,6 +15,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		path: "/models/newyork.obj",
 		scale: 0.4,
 		randomizeColor: true,
+		hoverText: "Live in Brooklyn, NY",
 	},
 	{
 		id: "python",
@@ -23,6 +25,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 20,
 		preserveColors: false,
 		randomizeColor: false,
+		hoverText: "Multidisciplinary Python expertise",
 	},
 	{
 		id: "gitlab",
@@ -32,6 +35,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 40,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Configure CI/CD with GitLab",
 	},
 	{
 		id: "aws",
@@ -41,6 +45,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 25,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "AWS Certified Solutions Architect",
 	},
 	{
 		id: "gcp",
@@ -50,6 +55,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 100,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Build on Google Cloud Platform",
 	},
 	{
 		id: "react",
@@ -59,6 +65,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Create web experiences with React",
 	},
 	{
 		id: "terraform",
@@ -68,6 +75,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Manage infrastructure with Terraform",
 	},
 	{
 		id: "typescript",
@@ -77,6 +85,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 75,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Contribute to TypeScript codebases",
 	},
 	{
 		id: "docker",
@@ -86,5 +95,15 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2.5,
 		preserveColors: true,
 		randomizeColor: false,
+		hoverText: "Containerize applications with Docker",
+	},
+	{
+		id: "brain",
+		type: "obj",
+		path: "/models/brain.obj",
+		scale: 0.0025,
+		randomizeColor: false,
+		hoverText: "Architect AI systems",
+		color: "#FF91AF",
 	},
 ];
