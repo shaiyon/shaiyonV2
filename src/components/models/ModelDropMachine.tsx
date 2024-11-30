@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Suspense } from "react";
 import { usePauseContext } from "../../contexts/PauseContext";
 import { ModelConfig } from "./types";
@@ -6,7 +6,7 @@ import { Model } from "./Model";
 import { MODEL_CONFIGS } from "./modelConfigs";
 
 const SPAWN_INTERVAL = 1 * 1000;
-const Y_THRESHOLD = -10;
+const Y_THRESHOLD = -20;
 
 interface DropModel {
 	id: number;
@@ -24,10 +24,15 @@ const getRandomColor = () => {
 	return `hsl(${h * 360}, ${s * 100}%, ${l * 100}%)`;
 };
 
-export const ModelDropMachine: React.FC = () => {
+export const ModelDropMachine = ({
+	isTrapDoorTriggered,
+}: {
+	isTrapDoorTriggered: boolean;
+}) => {
 	const { isPaused } = usePauseContext();
 	const [models, setModels] = useState<DropModel[]>([]);
 	const [spawnQueue, setSpawnQueue] = useState<ModelConfig[]>([]);
+	const prevTrapDoorState = useRef(isTrapDoorTriggered);
 
 	const createModel = useCallback((config: ModelConfig): DropModel => {
 		return {
@@ -50,8 +55,18 @@ export const ModelDropMachine: React.FC = () => {
 
 			setModels((prevModels) => {
 				if (newPosition[1] <= Y_THRESHOLD) {
-					console.log(`[RESPAWN] Model ${id} has fallen, respawning`);
-					// Find the fallen model and its config
+					console.log(`[FALL] Model ${id} has fallen`);
+
+					// If trap door is triggered, remove the model without respawning
+					if (isTrapDoorTriggered) {
+						console.log(
+							`[REMOVE] Removing model ${id} (trap door open)`
+						);
+						return prevModels.filter((model) => model.id !== id);
+					}
+
+					// Otherwise respawn as usual
+					console.log(`[RESPAWN] Respawning model ${id}`);
 					const fallenModel = prevModels.find(
 						(model) => model.id === id
 					);
@@ -62,13 +77,11 @@ export const ModelDropMachine: React.FC = () => {
 					);
 					if (!config) return prevModels;
 
-					// Replace the fallen model with a new instance of the same type
 					return prevModels.map((model) =>
 						model.id === id ? createModel(config) : model
 					);
 				}
 
-				// Otherwise just update the position
 				return prevModels.map((model) =>
 					model.id === id
 						? { ...model, position: newPosition }
@@ -76,21 +89,41 @@ export const ModelDropMachine: React.FC = () => {
 				);
 			});
 		},
-		[createModel, isPaused]
+		[createModel, isPaused, isTrapDoorTriggered]
 	);
 
-	// Initial setup
-	useEffect(() => {
-		// Create a shuffled queue of configs
+	// Reset function to shuffle configs and clear models
+	const resetModels = useCallback(() => {
+		console.log("[RESET] Clearing models and reshuffling queue");
+		setModels([]); // Clear all existing models
 		const shuffledConfigs = [...MODEL_CONFIGS].sort(
 			() => Math.random() - 0.5
 		);
 		setSpawnQueue(shuffledConfigs);
 	}, []);
 
+	// Initial setup
+	useEffect(() => {
+		resetModels();
+	}, [resetModels]);
+
+	// Handle trap door state change
+	useEffect(() => {
+		// Check if transitioning from open to closed
+		if (prevTrapDoorState.current && !isTrapDoorTriggered) {
+			console.log(
+				"[TRAP DOOR] Transitioning from open to closed, resetting models"
+			);
+			resetModels();
+		}
+		// Update the previous state
+		prevTrapDoorState.current = isTrapDoorTriggered;
+	}, [isTrapDoorTriggered, resetModels]);
+
 	// Handle spawning with pause support
 	useEffect(() => {
-		if (isPaused || spawnQueue.length === 0) return;
+		console.log(`is trap door triggered: ${isTrapDoorTriggered}`);
+		if (isPaused || isTrapDoorTriggered || spawnQueue.length === 0) return;
 
 		const spawnInterval = setInterval(() => {
 			setSpawnQueue((prevQueue) => {
@@ -108,7 +141,7 @@ export const ModelDropMachine: React.FC = () => {
 		}, SPAWN_INTERVAL);
 
 		return () => clearInterval(spawnInterval);
-	}, [isPaused, createModel, spawnQueue]);
+	}, [isPaused, isTrapDoorTriggered, createModel, spawnQueue]);
 
 	return (
 		<Suspense fallback={null}>

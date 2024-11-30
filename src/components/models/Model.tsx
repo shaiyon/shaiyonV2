@@ -10,10 +10,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
 
-import {
-	RigidBody,
-	type RigidBody as RigidBodyType,
-} from "@react-three/rapier";
+import { RigidBody } from "@react-three/rapier";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Text3D } from "@react-three/drei";
 
@@ -38,7 +35,7 @@ const ModelDescription = ({
 	isDragging,
 }: {
 	text: string;
-	rigidBodyRef: React.RefObject<RigidBodyType>;
+	rigidBodyRef: React.RefObject<typeof RigidBody>;
 	isDragging: boolean;
 }) => {
 	const { camera } = useThree();
@@ -117,7 +114,7 @@ export const Model: React.FC<ModelProps> = ({
 	const { setIsEnabled: setCameraEnabled } = useCameraContext();
 	const { camera, raycaster, pointer } = useThree();
 	const [showDescription, setShowDescription] = useState(false);
-	const rigidBodyRef = useRef<RigidBodyType>(null);
+	const rigidBodyRef = useRef<typeof RigidBody>(null);
 
 	const objLoader = useMemo(() => new OBJLoader(), []);
 	const svgLoader = useMemo(() => new SVGLoader(), []);

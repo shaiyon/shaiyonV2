@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RigidBody } from "@react-three/rapier";
 import { useTexture } from "@react-three/drei";
@@ -8,8 +8,7 @@ import { usePauseContext } from "../../contexts/PauseContext";
 
 const MAX_SPHERES = 75;
 const SPAWN_INTERVAL = 0.2 * 1000;
-const CLEANUP_INTERVAL = 1 * 1000;
-const Y_THRESHOLD = -5;
+const Y_THRESHOLD = -20;
 
 interface Sphere {
 	id: number;
@@ -65,78 +64,103 @@ const TexturedSphereMaterial: React.FC<TexturedSphereMaterialProps> = ({
 	return <meshStandardMaterial {...textures} {...getMaterialProps()} />;
 };
 
+const PhysicsSphere: React.FC<{
+	sphere: Sphere;
+	onRemove: (id: number) => void;
+	textureType: SphereTextureType;
+}> = ({ sphere, onRemove, textureType }) => {
+	const rigidBodyRef = useRef<RigidBodyApi>(null);
+
+	useEffect(() => {
+		const checkPosition = () => {
+			if (rigidBodyRef.current) {
+				const position = rigidBodyRef.current.translation();
+				if (position.y < Y_THRESHOLD) {
+					// Remove the sphere from physics world and scene
+					rigidBodyRef.current.sleep();
+					onRemove(sphere.id);
+				}
+			}
+		};
+
+		const interval = setInterval(checkPosition, 100);
+		return () => clearInterval(interval);
+	}, [sphere.id, onRemove]);
+
+	return (
+		<RigidBody
+			ref={rigidBodyRef}
+			position={sphere.position}
+			linearVelocity={sphere.velocity}
+			colliders="ball"
+			restitution={0.7}
+		>
+			<mesh castShadow receiveShadow>
+				<sphereGeometry args={[0.3]} />
+				<TexturedSphereMaterial textureType={textureType} />
+			</mesh>
+		</RigidBody>
+	);
+};
+
 interface SphereDropMachineProps {
 	selectedTextureType: SphereTextureType;
+	isTrapDoorTriggered: boolean;
 }
 
-export const SphereDropMachine = ({
+export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
 	selectedTextureType,
-}: SphereDropMachineProps) => {
+	isTrapDoorTriggered,
+}) => {
 	const { isPaused } = usePauseContext();
 	const [spheres, setSpheres] = useState<Sphere[]>([]);
 
 	const spawnFallingSphere = () => {
 		const randomX = Math.random() * 6 - 3;
-		setSpheres((prev) => [
-			...prev,
-			{
-				id: Date.now(),
-				position: [randomX, 12, -1],
-				velocity: [0, -0.1, 0],
-			},
-		]);
+		setSpheres((prev) => {
+			// Only add new sphere if under MAX_SPHERES
+			if (prev.length >= MAX_SPHERES) {
+				return prev;
+			}
+			return [
+				...prev,
+				{
+					id: Date.now(),
+					position: [randomX, 12, -1],
+					velocity: [0, -0.1, 0],
+				},
+			];
+		});
 	};
 
+	// Handle sphere removal
+	const handleRemoveSphere = (id: number) => {
+		setSpheres((prev) => prev.filter((sphere) => sphere.id !== id));
+	};
+
+	// Spawn effect
 	useEffect(() => {
 		if (isPaused) return;
-
 		const spawnInterval = setInterval(spawnFallingSphere, SPAWN_INTERVAL);
+		return () => clearInterval(spawnInterval);
+	}, [isPaused, isTrapDoorTriggered]);
 
-		const cleanupInterval = setInterval(() => {
-			console.log(`sphere count ${spheres.length}`);
-
-			setSpheres((prev) => {
-				const remainingSpheres = prev.filter(
-					(sphere) => sphere.position[1] > Y_THRESHOLD
-				);
-
-				// If we're over MAX_SPHERES, remove the oldest ones
-				if (remainingSpheres.length > MAX_SPHERES) {
-					return remainingSpheres.slice(-MAX_SPHERES);
-				}
-
-				return remainingSpheres;
-			});
-		}, CLEANUP_INTERVAL);
-
-		// Prevent context menu
+	useEffect(() => {
 		const handleContextMenu = (e: Event) => e.preventDefault();
 		document.addEventListener("contextmenu", handleContextMenu);
-
-		return () => {
-			clearInterval(spawnInterval);
-			clearInterval(cleanupInterval);
+		return () =>
 			document.removeEventListener("contextmenu", handleContextMenu);
-		};
-	}, [isPaused, spheres.length]);
+	}, []);
 
 	return (
 		<>
 			{spheres.map((sphere) => (
-				<RigidBody
+				<PhysicsSphere
 					key={sphere.id}
-					position={sphere.position}
-					linearVelocity={sphere.velocity}
-					colliders="ball"
-					restitution={0.7}
-				>
-					<mesh castShadow receiveShadow>
-						<sphereGeometry args={[0.3]} />
-						<TexturedSphereMaterial
-							textureType={selectedTextureType}
-						/>
-					</mesh>
-				</RigidBody>
+					sphere={sphere}
+					onRemove={handleRemoveSphere}
+					textureType={selectedTextureType}
+				/>
 			))}
 		</>
 	);

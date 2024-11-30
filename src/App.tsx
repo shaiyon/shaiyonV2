@@ -1,15 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Crosshair } from "lucide-react";
-
+import { RefreshCw, Crosshair, HelpCircle } from "lucide-react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { OrbitControls } from "@react-three/drei";
 
-// import {
-// 	PerformanceMonitor,
-// 	PerformanceStats,
-// } from "./components/PerformanceMonitor";
 import { useDevice } from "./utils/useDevice";
 import { AssetLoader } from "./AssetLoader";
 import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
@@ -50,11 +45,13 @@ const Controls = ({ controlsRef }: ControlsProps) => {
 interface ActionButtonsProps {
 	defaultCameraPosition: [number, number, number];
 	controlsRef: React.RefObject<OrbitControlsImpl>;
+	onTriggerTrapDoor: () => void;
 }
 
 const ActionButtons = ({
 	defaultCameraPosition,
 	controlsRef,
+	onTriggerTrapDoor,
 }: ActionButtonsProps) => {
 	const handleReset = () => {
 		window.location.reload();
@@ -90,6 +87,13 @@ const ActionButtons = ({
 			>
 				<Crosshair size={20} />
 			</button>
+			<button
+				onClick={onTriggerTrapDoor}
+				className={buttonClasses}
+				aria-label="Trigger Trap Door"
+			>
+				<HelpCircle size={20} />
+			</button>
 		</div>
 	);
 };
@@ -104,6 +108,7 @@ export const App = () => {
 		selectRandomTextures()
 	);
 	const [isSceneReady, setIsSceneReady] = useState(false);
+	const [isTrapDoorTriggered, setIsTrapDoorTriggered] = useState(false);
 
 	useEffect(() => {
 		const handleVisibilityChange = () => {
@@ -130,6 +135,13 @@ export const App = () => {
 		setIsSceneReady(true);
 	};
 
+	const handleTriggerTrapDoor = () => {
+		setIsTrapDoorTriggered(true);
+		setTimeout(() => {
+			setIsTrapDoorTriggered(false);
+		}, 3000);
+	};
+
 	return (
 		<div className="w-screen h-screen select-none touch-none">
 			<ActionButtons
@@ -137,8 +149,8 @@ export const App = () => {
 					defaultCameraPosition as [number, number, number]
 				}
 				controlsRef={controlsRef}
+				onTriggerTrapDoor={handleTriggerTrapDoor}
 			/>
-			{/* <PerformanceMonitor /> */}
 			<CameraProvider>
 				<PauseProvider isPaused={!isPageVisible}>
 					<AssetLoader
@@ -158,9 +170,11 @@ export const App = () => {
 									paused={!isPageVisible}
 									timeStep={isPageVisible ? 1 / 60 : 0}
 								>
-									{/* <PerformanceStats /> Inside Canvas */}
 									<Scene
 										selectedTextures={selectedTextures}
+										isTrapDoorTriggered={
+											isTrapDoorTriggered
+										}
 									/>
 								</Physics>
 							</Canvas>

@@ -11,12 +11,17 @@ import { SphereDropMachine } from "./spheres/SphereDropMachine";
 import { ModelDropMachine } from "./models/ModelDropMachine";
 import type { SelectedTextures } from "../textureTypes";
 import { ShockwaveHandler } from "./ShockwaveHandler";
+// import { SwingingBox } from "./SwingingBox";
 
 interface SceneProps {
 	selectedTextures: SelectedTextures;
+	isTrapDoorTriggered: boolean;
 }
 
-export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
+export const Scene: React.FC<SceneProps> = ({
+	selectedTextures,
+	isTrapDoorTriggered,
+}) => {
 	const { camera } = useThree();
 	const skyRef = useRef<THREE.Group>(null);
 	const [Floor, setFloor] = useState<React.ComponentType<any> | null>(null);
@@ -26,11 +31,11 @@ export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
 
 		const loadFloorComponent = async () => {
 			try {
-				const FloorComponent = await loadFloor(
-					selectedTextures.floorType
+				const { default: TrapDoorFloor } = await import(
+					"./floors/TrapDoorFloor"
 				);
-				if (mounted && FloorComponent) {
-					setFloor(() => FloorComponent);
+				if (mounted) {
+					setFloor(() => TrapDoorFloor);
 				}
 			} catch (error) {
 				console.error("Error loading floor:", error);
@@ -51,6 +56,14 @@ export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
 			skyRef.current.rotation.z = rotation.z * 1;
 		}
 	});
+
+	// Calculate positions for both trap doors
+	const rightPosition = defaultFloorProps.position;
+	const leftPosition = [
+		-defaultFloorProps.position[0], // Mirror X coordinate
+		defaultFloorProps.position[1], // Keep Y the same
+		defaultFloorProps.position[2], // Keep Z the same
+	];
 
 	return (
 		<>
@@ -74,9 +87,28 @@ export const Scene: React.FC<SceneProps> = ({ selectedTextures }) => {
 			<SocialLinks />
 			<SphereDropMachine
 				selectedTextureType={selectedTextures.sphereType}
+				isTrapDoorTriggered={isTrapDoorTriggered}
 			/>
-			<ModelDropMachine />
-			{Floor && <Floor {...defaultFloorProps} />}
+			<ModelDropMachine isTrapDoorTriggered={isTrapDoorTriggered} />
+			{Floor && (
+				<>
+					<Floor
+						{...defaultFloorProps}
+						position={rightPosition}
+						textureSet={selectedTextures.floorType}
+						isTriggered={isTrapDoorTriggered}
+						side="right"
+					/>
+					<Floor
+						{...defaultFloorProps}
+						position={leftPosition}
+						textureSet={selectedTextures.floorType}
+						isTriggered={isTrapDoorTriggered}
+						side="left"
+					/>
+				</>
+			)}
+			{/* <SwingingBox position={[-3, 3, -2]} /> */}
 		</>
 	);
 };
