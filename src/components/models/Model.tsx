@@ -5,7 +5,7 @@ import React, {
 	useMemo,
 	useCallback,
 } from "react";
-import { OBJLoader, SVGLoader } from "three-stdlib";
+import { OBJLoader, SVGLoader, FontLoader, TextGeometry } from "three-stdlib";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
@@ -282,44 +282,95 @@ export const Model: React.FC<ModelProps> = ({
 
 	useEffect(() => {
 		const loadModel = async () => {
-			try {
-				if (config.type === "obj") {
-					const loadedModel = await objLoader.loadAsync(config.path);
-					if ((color && config.randomizeColor) || config.color) {
-						applyColorToModel(
-							loadedModel,
-							config.color || color,
-							config
-						);
-					}
-					setModel(loadedModel);
-				} else if (config.type === "svg") {
-					const svgData = await svgLoader.loadAsync(config.svgPath);
-					const extrudedModel = createExtrudedGeometry(
-						svgData,
-						config as SVGModelConfig,
-						(config as SVGModelConfig).depth
+			if (config.type === "obj") {
+				const loadedModel = await objLoader.loadAsync(config.path);
+				if ((color && config.randomizeColor) || config.color) {
+					applyColorToModel(
+						loadedModel,
+						config.color || color,
+						config
 					);
-					if (color && config.randomizeColor) {
-						applyColorToModel(extrudedModel, color, config);
-					}
-					setModel(extrudedModel);
-				} else if (config.type === "glb") {
-					const loadedGLTF = await gltfLoader.loadAsync(
-						config.glbPath
-					);
-					if ((color && config.randomizeColor) || config.color) {
-						applyColorToModel(
-							loadedGLTF.scene,
-							config.color || color,
-							config
-						);
-					}
-					setModel(loadedGLTF.scene);
 				}
-			} catch (err) {
-				console.error(`Error loading model ${config.id}:`, err);
-				setError((err as Error).message);
+				setModel(loadedModel);
+			} else if (config.type === "svg") {
+				const svgData = await svgLoader.loadAsync(config.svgPath);
+				const extrudedModel = createExtrudedGeometry(
+					svgData,
+					config as SVGModelConfig,
+					(config as SVGModelConfig).depth
+				);
+				if (color && config.randomizeColor) {
+					applyColorToModel(extrudedModel, color, config);
+				}
+				setModel(extrudedModel);
+			} else if (config.type === "glb") {
+				const loadedGLTF = await gltfLoader.loadAsync(config.glbPath);
+				if ((color && config.randomizeColor) || config.color) {
+					applyColorToModel(
+						loadedGLTF.scene,
+						config.color || color,
+						config
+					);
+				}
+				setModel(loadedGLTF.scene);
+			} else if (config.type === "text") {
+				const loader = new FontLoader();
+				const textGroup = new THREE.Group();
+
+				try {
+					const font = await loader.loadAsync(
+						"/fonts/helvetiker_regular.json"
+					);
+					const textGeometry = new TextGeometry(config.text || "", {
+						font,
+						size: 1,
+						height: 0.6,
+						curveSegments: 12,
+					});
+
+					// Center the geometry
+					textGeometry.computeBoundingBox();
+					const boundingBox = textGeometry.boundingBox!;
+					const centerOffset = new THREE.Vector3();
+					boundingBox.getCenter(centerOffset);
+					textGeometry.translate(
+						-centerOffset.x,
+						-centerOffset.y,
+						-centerOffset.z
+					);
+
+					// Create visible text mesh
+					const material = new THREE.MeshStandardMaterial({
+						color: config.color || color || "black",
+						metalness: 0.1,
+						roughness: 0.2,
+					});
+					const textMesh = new THREE.Mesh(textGeometry, material);
+
+					// Create invisible hitbox slightly larger than the text
+					const boxSize = new THREE.Vector3();
+					boundingBox.getSize(boxSize);
+					const padding = 0.1;
+					const hitboxGeometry = new THREE.BoxGeometry(
+						boxSize.x + padding * 2,
+						boxSize.y + padding * 2,
+						boxSize.z + padding * 2
+					);
+					const hitboxMaterial = new THREE.MeshBasicMaterial({
+						visible: false,
+					});
+					const hitboxMesh = new THREE.Mesh(
+						hitboxGeometry,
+						hitboxMaterial
+					);
+
+					textGroup.add(textMesh);
+					textGroup.add(hitboxMesh);
+					setModel(textGroup);
+				} catch (err) {
+					console.error("Error loading font:", err);
+					setError((err as Error).message);
+				}
 			}
 		};
 

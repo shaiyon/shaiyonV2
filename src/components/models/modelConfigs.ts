@@ -1,22 +1,6 @@
 import { ModelConfig } from "./types";
 
-export const MODEL_CONFIGS: ModelConfig[] = [
-	// {
-	// 	id: "california",
-	// 	type: "obj",
-	// 	path: "/models/california.obj",
-	// 	scale: 0.4,
-	// 	randomizeColor: true,
-	// 	hoverText: "From the Bay Area, CA",
-	// },
-	// {
-	// 	id: "newyork",
-	// 	type: "obj",
-	// 	path: "/models/newyork.obj",
-	// 	scale: 0.4,
-	// 	randomizeColor: true,
-	// 	hoverText: "Live in Brooklyn, NY",
-	// },
+export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 	{
 		id: "python",
 		type: "svg",
@@ -52,7 +36,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		type: "svg",
 		svgPath: "/models/gcp.svg",
 		scale: 0.0005,
-		depth: 100,
+		depth: 150,
 		preserveColors: true,
 		randomizeColor: false,
 		hoverText: "Create on Google Cloud Platform",
@@ -113,5 +97,50 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		scale: 0.45,
 		randomizeColor: false,
 		hoverText: "Education in Stats, Econ, & CS",
+	},
+];
+
+export const PERSONAL_MODEL_CONFIGS: ModelConfig[] = [
+	{
+		id: "california",
+		type: "obj",
+		path: "/models/california.obj",
+		scale: 0.4,
+		randomizeColor: true,
+		hoverText: "From the Bay Area, CA",
+	},
+	{
+		id: "newyork",
+		type: "obj",
+		path: "/models/newyork.obj",
+		scale: 0.4,
+		randomizeColor: true,
+		hoverText: "Live in Brooklyn, NY",
+	},
+	{
+		id: "globe",
+		type: "glb",
+		glbPath: "/models/globe.glb",
+		scale: 2.5,
+		randomizeColor: false,
+		hoverText: "Traveled while working for 3 years",
+	},
+	{
+		id: "lionandsun",
+		type: "svg",
+		svgPath: "/models/lionandsun.svg",
+		scale: 0.006,
+		depth: 30,
+		preserveColors: true,
+		randomizeColor: false,
+		hoverText: "Iranian heritage",
+	},
+	{
+		id: "glossa",
+		type: "text",
+		text: "γλώσσα",
+		scale: 0.3,
+		randomizeColor: false,
+		hoverText: "Linguistics enthusiast",
 	},
 ];

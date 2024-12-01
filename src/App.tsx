@@ -108,6 +108,7 @@ export const App = () => {
 		selectRandomTextures()
 	);
 	const [isSceneReady, setIsSceneReady] = useState(false);
+	const [mode, setMode] = useState<"work" | "personal">("work");
 	const [isTrapDoorTriggered, setIsTrapDoorTriggered] = useState(false);
 
 	useEffect(() => {
@@ -137,6 +138,7 @@ export const App = () => {
 
 	const handleTriggerTrapDoor = () => {
 		setIsTrapDoorTriggered(true);
+		setMode((prevMode) => (prevMode === "work" ? "personal" : "work"));
 		setTimeout(() => {
 			setIsTrapDoorTriggered(false);
 		}, 3000);
@@ -175,6 +177,7 @@ export const App = () => {
 										isTrapDoorTriggered={
 											isTrapDoorTriggered
 										}
+										mode={mode}
 									/>
 								</Physics>
 							</Canvas>

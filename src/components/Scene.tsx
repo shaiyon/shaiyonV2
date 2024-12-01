@@ -3,7 +3,6 @@ import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-import { loadFloor } from "./floors";
 import { defaultFloorProps } from "./floors/types";
 import { FloatingText } from "./FloatingText";
 import { SocialLinks } from "./SocialLinks";
@@ -11,16 +10,17 @@ import { SphereDropMachine } from "./spheres/SphereDropMachine";
 import { ModelDropMachine } from "./models/ModelDropMachine";
 import type { SelectedTextures } from "../textureTypes";
 import { ShockwaveHandler } from "./ShockwaveHandler";
-// import { SwingingBox } from "./SwingingBox";
 
 interface SceneProps {
 	selectedTextures: SelectedTextures;
 	isTrapDoorTriggered: boolean;
+	mode: "work" | "personal";
 }
 
 export const Scene: React.FC<SceneProps> = ({
 	selectedTextures,
 	isTrapDoorTriggered,
+	mode,
 }) => {
 	const { camera } = useThree();
 	const skyRef = useRef<THREE.Group>(null);
@@ -83,13 +83,19 @@ export const Scene: React.FC<SceneProps> = ({
 			<ambientLight intensity={0.5} />
 			<directionalLight position={[10, 10, 5]} intensity={1} castShadow />
 			<ShockwaveHandler />
-			<FloatingText isTrapDoorTriggered={isTrapDoorTriggered} />
+			<FloatingText
+				isTrapDoorTriggered={isTrapDoorTriggered}
+				mode={mode}
+			/>
 			<SocialLinks isTrapDoorTriggered={isTrapDoorTriggered} />
 			<SphereDropMachine
 				selectedTextureType={selectedTextures.sphereType}
 				isTrapDoorTriggered={isTrapDoorTriggered}
 			/>
-			<ModelDropMachine isTrapDoorTriggered={isTrapDoorTriggered} />
+			<ModelDropMachine
+				isTrapDoorTriggered={isTrapDoorTriggered}
+				mode={mode}
+			/>
 			{Floor && (
 				<>
 					<Floor
@@ -108,7 +114,6 @@ export const Scene: React.FC<SceneProps> = ({
 					/>
 				</>
 			)}
-			{/* <SwingingBox position={[-3, 3, -2]} /> */}
 		</>
 	);
 };

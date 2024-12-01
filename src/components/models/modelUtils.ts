@@ -60,6 +60,47 @@ export const createExtrudedGeometry = (
 				}
 			}
 		}
+
+		// Handle text elements if they exist
+		const textElements = xmlDoc.getElementsByTagName("text");
+		if (textElements.length > 0) {
+			Array.from(textElements).forEach((textElement) => {
+				const text = textElement.textContent || "";
+				const fontSize = parseFloat(
+					textElement.getAttribute("font-size") || "32"
+				);
+				const x = parseFloat(textElement.getAttribute("x") || "0");
+				const y = parseFloat(textElement.getAttribute("y") || "0");
+
+				// Create a temporary canvas to measure and create path from text
+				const canvas = document.createElement("canvas");
+				const context = canvas.getContext("2d")!;
+				const fontFamily =
+					textElement.getAttribute("font-family") || "Arial";
+				context.font = `${fontSize}px ${fontFamily}`;
+
+				// Measure text
+				const metrics = context.measureText(text);
+				const width = metrics.width;
+				const height = fontSize;
+
+				// Create an SVG path for the text
+				const textPath = {
+					type: "path",
+					userData: textElement.userData || {},
+					// Preserve the original style information
+					style: {
+						fill:
+							textElement.getAttribute("fill") || "currentColor",
+						stroke: textElement.getAttribute("stroke"),
+						strokeWidth: textElement.getAttribute("stroke-width"),
+					},
+				};
+
+				// Add to existing paths array
+				svgData.paths.push(textPath);
+			});
+		}
 	}
 
 	svgData.paths.forEach((path: any) => {
@@ -69,13 +110,12 @@ export const createExtrudedGeometry = (
 		// Special handling for Python logo
 		let pathColor: Color;
 		if (config.id === "python") {
-			// Check if it's the first or second path to determine color
 			const isFirstPath = path.userData.node
-				.getAttribute("d")
-				.startsWith("M126.915866");
+				?.getAttribute("d")
+				?.startsWith("M126.915866");
 			pathColor = isFirstPath
-				? new Color("#387EB8") // Python blue for first path
-				: new Color("#FFE052"); // Python yellow for second path
+				? new Color("#387EB8")
+				: new Color("#FFE052");
 		} else if (config.id === "docker") {
 			pathColor = new Color("#2396ED");
 		} else {
@@ -157,7 +197,6 @@ export const getPlatformAdjustedColor = (
 	color: string | Color,
 	config: ModelConfig
 ) => {
-	// Always return a properly formatted hex color regardless of platform
 	return color instanceof Color
 		? `#${color.getHexString()}`
 		: color.startsWith("#")

@@ -24,4 +24,13 @@ export interface GLBModelConfig extends BaseModelConfig {
 	preserveColors?: boolean;
 }
 
-export type ModelConfig = OBJModelConfig | SVGModelConfig | GLBModelConfig;
+export interface TextModelConfig extends BaseModelConfig {
+	type: "text";
+	text: string;
+}
+
+export type ModelConfig =
+	| OBJModelConfig
+	| SVGModelConfig
+	| GLBModelConfig
+	| TextModelConfig;

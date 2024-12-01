@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { usePauseContext } from "../../contexts/PauseContext";
 import { ModelConfig } from "./types";
 import { Model } from "./Model";
-import { MODEL_CONFIGS } from "./modelConfigs";
+import { WORK_MODEL_CONFIGS, PERSONAL_MODEL_CONFIGS } from "./modelConfigs";
 
 const SPAWN_INTERVAL = 1 * 1000;
 const Y_THRESHOLD = -20;
@@ -24,15 +24,21 @@ const getRandomColor = () => {
 	return `hsl(${h * 360}, ${s * 100}%, ${l * 100}%)`;
 };
 
+interface ModelDropMachineProps {
+	isTrapDoorTriggered: boolean;
+	mode: "work" | "personal";
+}
+
 export const ModelDropMachine = ({
 	isTrapDoorTriggered,
-}: {
-	isTrapDoorTriggered: boolean;
-}) => {
+	mode,
+}: ModelDropMachineProps) => {
 	const { isPaused } = usePauseContext();
 	const [models, setModels] = useState<DropModel[]>([]);
 	const [spawnQueue, setSpawnQueue] = useState<ModelConfig[]>([]);
 	const prevTrapDoorState = useRef(isTrapDoorTriggered);
+	const [activeConfigs, setActiveConfigs] =
+		useState<ModelConfig[]>(WORK_MODEL_CONFIGS);
 
 	const createModel = useCallback((config: ModelConfig): DropModel => {
 		return {
@@ -57,7 +63,6 @@ export const ModelDropMachine = ({
 				if (newPosition[1] <= Y_THRESHOLD) {
 					console.log(`[FALL] Model ${id} has fallen`);
 
-					// If trap door is triggered, remove the model without respawning
 					if (isTrapDoorTriggered) {
 						console.log(
 							`[REMOVE] Removing model ${id} (trap door open)`
@@ -65,14 +70,13 @@ export const ModelDropMachine = ({
 						return prevModels.filter((model) => model.id !== id);
 					}
 
-					// Otherwise respawn as usual
 					console.log(`[RESPAWN] Respawning model ${id}`);
 					const fallenModel = prevModels.find(
 						(model) => model.id === id
 					);
 					if (!fallenModel) return prevModels;
 
-					const config = MODEL_CONFIGS.find(
+					const config = activeConfigs.find(
 						(c) => c.id === fallenModel.configId
 					);
 					if (!config) return prevModels;
@@ -89,40 +93,47 @@ export const ModelDropMachine = ({
 				);
 			});
 		},
-		[createModel, isPaused, isTrapDoorTriggered]
+		[createModel, isPaused, isTrapDoorTriggered, activeConfigs]
 	);
 
 	// Reset function to shuffle configs and clear models
 	const resetModels = useCallback(() => {
-		console.log("[RESET] Clearing models and reshuffling queue");
+		console.log(
+			`[RESET] Clearing models and reshuffling queue for ${mode} mode`
+		);
 		setModels([]); // Clear all existing models
-		const shuffledConfigs = [...MODEL_CONFIGS].sort(
+		const configsToUse =
+			mode === "work" ? WORK_MODEL_CONFIGS : PERSONAL_MODEL_CONFIGS;
+		setActiveConfigs(configsToUse);
+		const shuffledConfigs = [...configsToUse].sort(
 			() => Math.random() - 0.5
 		);
 		setSpawnQueue(shuffledConfigs);
-	}, []);
+	}, [mode]);
 
-	// Initial setup
+	// Initial setup only
 	useEffect(() => {
 		resetModels();
-	}, [resetModels]);
+	}, []); // Remove mode dependency - we'll handle mode changes in trap door effect
 
-	// Handle trap door state change
+	// Handle trap door state change and mode transitions
 	useEffect(() => {
-		// Check if transitioning from open to closed
 		if (prevTrapDoorState.current && !isTrapDoorTriggered) {
+			// Only reset models after trap door closes
 			console.log(
 				"[TRAP DOOR] Transitioning from open to closed, resetting models"
 			);
 			resetModels();
 		}
-		// Update the previous state
+		// When trap door opens, just let existing models fall
+		else if (!prevTrapDoorState.current && isTrapDoorTriggered) {
+			console.log("[TRAP DOOR] Opening, letting models fall");
+		}
 		prevTrapDoorState.current = isTrapDoorTriggered;
 	}, [isTrapDoorTriggered, resetModels]);
 
 	// Handle spawning with pause support
 	useEffect(() => {
-		console.log(`is trap door triggered: ${isTrapDoorTriggered}`);
 		if (isPaused || isTrapDoorTriggered || spawnQueue.length === 0) return;
 
 		const spawnInterval = setInterval(() => {
@@ -146,7 +157,7 @@ export const ModelDropMachine = ({
 	return (
 		<Suspense fallback={null}>
 			{models.map((model) => {
-				const config = MODEL_CONFIGS.find(
+				const config = activeConfigs.find(
 					(c) => c.id === model.configId
 				);
 				if (!config) return null;
