@@ -1,10 +1,8 @@
 import { useRef, useState, useMemo, useEffect } from "react";
-
 import { Group, Vector3, CircleGeometry, MeshBasicMaterial } from "three";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
 import { SVGLoader } from "three-stdlib";
-
 import {
 	Shape,
 	ExtrudeGeometry,
@@ -12,6 +10,8 @@ import {
 	MeshStandardMaterial,
 	Color,
 	Object3D,
+	Box3,
+	Vector3 as ThreeVector3,
 } from "three";
 
 interface SocialIconConfig {
@@ -28,14 +28,14 @@ const SOCIAL_CONFIGS: SocialIconConfig[] = [
 		svgPath: "/linkedin.svg",
 		url: "https://linkedin.com/in/shaiyon",
 		scale: 0.001,
-		position: [1, 0.85, 0],
+		position: [1, 0.4, 0],
 	},
 	{
 		id: "github",
 		svgPath: "/github.svg",
 		url: "https://github.com/shaiyon",
 		scale: 0.0004,
-		position: [-1, 0.875, 0],
+		position: [-1, 0.4, 0],
 	},
 ];
 
@@ -55,6 +55,8 @@ const createExtrudedGeometry = (svgData: any, depth: number = 50) => {
 				color: new Color(0x000000),
 				metalness: 0.1,
 				roughness: 0.8,
+				transparent: true,
+				opacity: 1,
 			});
 			const mesh = new Mesh(geometry, material);
 			group.add(mesh);
@@ -65,45 +67,69 @@ const createExtrudedGeometry = (svgData: any, depth: number = 50) => {
 
 interface SocialIconProps {
 	config: SocialIconConfig;
+	isTrapDoorTriggered: boolean;
 }
 
-const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
+const SocialIcon: React.FC<SocialIconProps> = ({
+	config,
+	isTrapDoorTriggered,
+}) => {
 	const groupRef = useRef<Group>(null);
+	const rigidBodyRef = useRef<RigidBody>(null);
 	const hitboxRef = useRef<Mesh>(null);
 	const [hovered, setHovered] = useState(false);
+	const [opacity, setOpacity] = useState(1);
+	const [isResetting, setIsResetting] = useState(false);
+	const previousTriggerState = useRef(isTrapDoorTriggered);
+	const fadeAnimationRef = useRef<number>();
 	const [model, setModel] = useState<Object3D | null>(null);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
+	const [modelBounds, setModelBounds] = useState<{
+		size: ThreeVector3;
+		center: ThreeVector3;
+	} | null>(null);
 
-	// Load SVG model
 	useEffect(() => {
 		const loadModel = async () => {
 			try {
 				const svgData = await svgLoader.loadAsync(config.svgPath);
 				const extrudedModel = createExtrudedGeometry(svgData);
+
+				extrudedModel.traverse((child) => {
+					if (child instanceof Mesh) {
+						const material = child.material as MeshStandardMaterial;
+						material.transparent = true;
+						material.opacity = opacity;
+					}
+				});
+
+				const box = new Box3().setFromObject(extrudedModel);
+				const size = new ThreeVector3();
+				const center = new ThreeVector3();
+				box.getSize(size);
+				box.getCenter(center);
+				setModelBounds({ size, center });
+
 				setModel(extrudedModel);
 			} catch (err) {
 				console.error(`Error loading model ${config.id}:`, err);
 			}
 		};
 		loadModel();
-	}, [config.svgPath, config.id, svgLoader]);
+	}, [config.svgPath, config.id, svgLoader, opacity]);
 
-	// Animate hover effect
 	useFrame((state) => {
-		if (groupRef.current) {
-			// Floating animation
+		if (groupRef.current && !isTrapDoorTriggered) {
 			groupRef.current.position.y =
 				config.position[1] +
 				Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
 
-			// Scale animation on hover
 			const targetScale = hovered ? 1.1 : 1;
 			groupRef.current.scale.lerp(
 				{ x: targetScale, y: targetScale, z: targetScale } as Vector3,
 				0.1
 			);
 
-			// Update material color on hover
 			if (model) {
 				model.traverse((child) => {
 					if (child instanceof Mesh) {
@@ -112,51 +138,101 @@ const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 							hovered ? 0x4a9eff : 0x000000
 						);
 						material.color.lerp(targetColor, 0.1);
+						material.opacity = opacity;
 					}
 				});
 			}
 		}
 	});
 
-	if (!model) return null;
+	useEffect(() => {
+		if (previousTriggerState.current && !isTrapDoorTriggered) {
+			setIsResetting(true);
 
-	// Create circular hitbox geometry
+			setTimeout(() => {
+				if (rigidBodyRef.current) {
+					setOpacity(0);
+
+					rigidBodyRef.current.setTranslation(
+						{
+							x: config.position[0],
+							y: config.position[1],
+							z: config.position[2],
+						},
+						true
+					);
+
+					rigidBodyRef.current.setRotation(
+						{ x: 0, y: 0, z: 0, w: 1 },
+						true
+					);
+
+					rigidBodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+					rigidBodyRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+
+					let startTime = Date.now();
+					const fadeInDuration = 2000;
+
+					const animate = () => {
+						const elapsed = Date.now() - startTime;
+						const progress = Math.min(elapsed / fadeInDuration, 1);
+
+						setOpacity(progress);
+
+						if (progress < 1) {
+							fadeAnimationRef.current =
+								requestAnimationFrame(animate);
+						} else {
+							setIsResetting(false);
+						}
+					};
+
+					fadeAnimationRef.current = requestAnimationFrame(animate);
+				}
+			}, 500);
+		}
+
+		previousTriggerState.current = isTrapDoorTriggered;
+
+		return () => {
+			if (fadeAnimationRef.current) {
+				cancelAnimationFrame(fadeAnimationRef.current);
+			}
+		};
+	}, [isTrapDoorTriggered, config.position]);
+
+	if (!model || !modelBounds) return null;
+
 	const hitboxGeometry = new CircleGeometry(1, 30);
-	const hitboxMaterial = new MeshBasicMaterial({
-		visible: false, // Make the hitbox invisible
-	});
+	const hitboxMaterial = new MeshBasicMaterial({ visible: false });
 
 	return (
-		<group position={config.position} ref={groupRef}>
-			<primitive
-				object={model}
-				scale={config.scale}
-				rotation={[Math.PI, 0, 0]}
-				receiveShadow
-				castShadow
-			/>
-			{config.id === "github" && (
-				<mesh
-					ref={hitboxRef}
-					geometry={hitboxGeometry}
-					material={hitboxMaterial}
-					scale={0.5} // Adjust this value to change hitbox size
-					onClick={() => window.open(config.url, "_blank")}
-					onPointerOver={() => {
-						document.body.style.cursor = "pointer";
-						setHovered(true);
-					}}
-					onPointerOut={() => {
-						document.body.style.cursor = "auto";
-						setHovered(false);
-					}}
-				/>
-			)}
-			{config.id !== "github" && (
+		<RigidBody
+			ref={rigidBodyRef}
+			type={isTrapDoorTriggered ? "dynamic" : "fixed"}
+			colliders="cuboid"
+			restitution={0.2}
+			friction={0.5}
+			mass={1}
+			position={[
+				config.position[0],
+				config.position[1],
+				config.position[2],
+			]}
+		>
+			<group ref={groupRef}>
 				<primitive
 					object={model}
 					scale={config.scale}
 					rotation={[Math.PI, 0, 0]}
+					receiveShadow
+					castShadow
+				/>
+				<mesh
+					ref={hitboxRef}
+					geometry={hitboxGeometry}
+					material={hitboxMaterial}
+					scale={0.4}
 					onClick={() => window.open(config.url, "_blank")}
 					onPointerOver={() => {
 						document.body.style.cursor = "pointer";
@@ -167,19 +243,27 @@ const SocialIcon: React.FC<SocialIconProps> = ({ config }) => {
 						setHovered(false);
 					}}
 				/>
-			)}
-		</group>
+			</group>
+		</RigidBody>
 	);
 };
 
-export const SocialLinks: React.FC = () => {
+interface SocialLinksProps {
+	isTrapDoorTriggered: boolean;
+}
+
+export const SocialLinks: React.FC<SocialLinksProps> = ({
+	isTrapDoorTriggered,
+}) => {
 	return (
 		<>
-			<RigidBody type="fixed">
-				{SOCIAL_CONFIGS.map((config) => (
-					<SocialIcon key={config.id} config={config} />
-				))}
-			</RigidBody>
+			{SOCIAL_CONFIGS.map((config) => (
+				<SocialIcon
+					key={config.id}
+					config={config}
+					isTrapDoorTriggered={isTrapDoorTriggered}
+				/>
+			))}
 		</>
 	);
 };

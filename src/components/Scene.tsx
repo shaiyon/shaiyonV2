@@ -83,8 +83,8 @@ export const Scene: React.FC<SceneProps> = ({
 			<ambientLight intensity={0.5} />
 			<directionalLight position={[10, 10, 5]} intensity={1} castShadow />
 			<ShockwaveHandler />
-			<FloatingText />
-			<SocialLinks />
+			<FloatingText isTrapDoorTriggered={isTrapDoorTriggered} />
+			<SocialLinks isTrapDoorTriggered={isTrapDoorTriggered} />
 			<SphereDropMachine
 				selectedTextureType={selectedTextures.sphereType}
 				isTrapDoorTriggered={isTrapDoorTriggered}

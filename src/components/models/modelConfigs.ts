@@ -85,7 +85,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 75,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Contribute to TypeScript projects",
+		hoverText: "Contribute to TypeScript codebaes",
 	},
 	{
 		id: "docker",
@@ -95,7 +95,7 @@ export const MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2.5,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Containerize applications with Docker",
+		hoverText: "Containerize with Docker",
 	},
 	{
 		id: "brain",
