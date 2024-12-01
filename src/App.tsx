@@ -10,6 +10,7 @@ import { AssetLoader } from "./AssetLoader";
 import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
 import { PauseProvider } from "./contexts/PauseContext";
 import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
+import { ModeLever } from "./components/ModeLever";
 import { Scene } from "./components/Scene";
 
 interface ControlsProps {
@@ -41,6 +42,8 @@ const Controls = ({ controlsRef }: ControlsProps) => {
 		/>
 	);
 };
+
+export type DisplayMode = "work" | "personal";
 
 interface ActionButtonsProps {
 	defaultCameraPosition: [number, number, number];
@@ -87,13 +90,6 @@ const ActionButtons = ({
 			>
 				<Crosshair size={20} />
 			</button>
-			<button
-				onClick={onTriggerTrapDoor}
-				className={buttonClasses}
-				aria-label="Trigger Trap Door"
-			>
-				<HelpCircle size={20} />
-			</button>
 		</div>
 	);
 };
@@ -108,7 +104,7 @@ export const App = () => {
 		selectRandomTextures()
 	);
 	const [isSceneReady, setIsSceneReady] = useState(false);
-	const [mode, setMode] = useState<"work" | "personal">("work");
+	const [mode, setMode] = useState<DisplayMode>("work");
 	const [isTrapDoorTriggered, setIsTrapDoorTriggered] = useState(false);
 
 	useEffect(() => {
@@ -146,6 +142,16 @@ export const App = () => {
 
 	return (
 		<div className="w-screen h-screen select-none touch-none">
+			<ModeLever
+				mode={mode}
+				onToggle={(newMode: DisplayMode) => {
+					setMode(newMode);
+					setIsTrapDoorTriggered(true);
+					setTimeout(() => {
+						setIsTrapDoorTriggered(false);
+					}, 3000);
+				}}
+			/>
 			<ActionButtons
 				defaultCameraPosition={
 					defaultCameraPosition as [number, number, number]
