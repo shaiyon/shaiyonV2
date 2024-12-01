@@ -56,6 +56,8 @@ const ActionButtons = ({
 	controlsRef,
 	onTriggerTrapDoor,
 }: ActionButtonsProps) => {
+	const { isMobile } = useDevice();
+
 	const handleReset = () => {
 		window.location.reload();
 	};
@@ -75,20 +77,24 @@ const ActionButtons = ({
 		"p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-colors duration-200 z-10";
 
 	return (
-		<div className="absolute top-4 right-4 flex flex-col gap-2">
-			<button
-				onClick={handleReset}
-				className={buttonClasses}
-				aria-label="Reset Scene"
-			>
-				<RefreshCw size={20} />
-			</button>
+		<div
+			className={`absolute ${
+				isMobile ? "bottom" : "top"
+			}-4 right-4 flex flex-col gap-2`}
+		>
 			<button
 				onClick={handleCenterCamera}
 				className={buttonClasses}
 				aria-label="Center Camera"
 			>
 				<Crosshair size={20} />
+			</button>
+			<button
+				onClick={handleReset}
+				className={buttonClasses}
+				aria-label="Reset Scene"
+			>
+				<RefreshCw size={20} />
 			</button>
 		</div>
 	);

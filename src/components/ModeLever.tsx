@@ -1,6 +1,8 @@
 import React from "react";
 import { Laptop, User } from "lucide-react";
 
+import { useDevice } from "../utils/useDevice";
+
 interface ModeLeverProps {
 	/** Current mode of the application */
 	mode: "work" | "personal";
@@ -13,8 +15,12 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 		onToggle(mode === "work" ? "personal" : "work");
 	};
 
+	const { isMobile } = useDevice();
+
 	return (
-		<div className="absolute top-4 left-4 z-10">
+		<div
+			className={`absolute ${isMobile ? "bottom" : "top"}-4 left-4 z-10`}
+		>
 			<div className="bg-blue-500 rounded-lg p-1.5 shadow-lg">
 				{/* Icons and Track */}
 				<div className="relative flex flex-col items-center">
