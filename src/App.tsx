@@ -79,22 +79,22 @@ const ActionButtons = ({
 	return (
 		<div
 			className={`absolute ${
-				isMobile ? "bottom" : "top"
-			}-4 right-4 flex flex-col gap-2`}
+				isMobile ? "bottom-4" : "top-4"
+			} right-4 flex flex-col gap-2`}
 		>
-			<button
-				onClick={handleCenterCamera}
-				className={buttonClasses}
-				aria-label="Center Camera"
-			>
-				<Crosshair size={20} />
-			</button>
 			<button
 				onClick={handleReset}
 				className={buttonClasses}
 				aria-label="Reset Scene"
 			>
 				<RefreshCw size={20} />
+			</button>
+			<button
+				onClick={handleCenterCamera}
+				className={buttonClasses}
+				aria-label="Center Camera"
+			>
+				<Crosshair size={20} />
 			</button>
 		</div>
 	);
