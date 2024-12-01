@@ -104,7 +104,9 @@ export const App = () => {
 		selectRandomTextures()
 	);
 	const [isSceneReady, setIsSceneReady] = useState(false);
-	const [mode, setMode] = useState<DisplayMode>("work");
+	const [mode, setMode] = useState<DisplayMode>(() => {
+		return window.location.pathname === "/me" ? "personal" : "work";
+	});
 	const [isTrapDoorTriggered, setIsTrapDoorTriggered] = useState(false);
 
 	useEffect(() => {

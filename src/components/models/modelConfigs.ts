@@ -161,12 +161,12 @@ export const PERSONAL_MODEL_CONFIGS: ModelConfig[] = [
 		randomizeColor: false,
 		hoverText: "History lover",
 	},
-	// {
-	// 	id: "motorcycle",
-	// 	type: "glb",
-	// 	glbPath: "/models/motorcycle.glb",
-	// 	scale: 0.75,
-	// 	randomizeColor: false,
-	// 	hoverText: "Explorer by nature",
-	// },
+	{
+		id: "motorcycle",
+		type: "glb",
+		glbPath: "/models/motorcycle.glb",
+		scale: 0.1,
+		randomizeColor: false,
+		hoverText: "Explorer by nature",
+	},
 ];
