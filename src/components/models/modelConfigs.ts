@@ -46,7 +46,7 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		type: "svg",
 		svgPath: "/models/react.svg",
 		scale: 0.04,
-		depth: 2,
+		depth: 4,
 		preserveColors: true,
 		randomizeColor: false,
 		hoverText: "Develop web experiences with React",
@@ -66,7 +66,7 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		type: "svg",
 		svgPath: "/models/typescript.svg",
 		scale: 0.0016,
-		depth: 75,
+		depth: 150,
 		preserveColors: true,
 		randomizeColor: false,
 		hoverText: "Contribute to TypeScript codebaes",
@@ -79,7 +79,7 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		depth: 2.5,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Containerize with Docker",
+		hoverText: "Containerize apps with Docker",
 	},
 	{
 		id: "brain",
@@ -87,7 +87,7 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		path: "/models/brain.obj",
 		scale: 0.0025,
 		randomizeColor: false,
-		hoverText: "Build AI systems",
+		hoverText: "Productionize AI workflows",
 		color: "#FF91AF",
 	},
 	{
@@ -97,6 +97,16 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		scale: 0.85,
 		randomizeColor: false,
 		hoverText: "Education in Stats, Econ, & CS",
+	},
+	{
+		id: "hallway",
+		type: "svg",
+		svgPath: "/models/hallway.svg",
+		scale: 0.04,
+		depth: 10,
+		preserveColors: true,
+		randomizeColor: false,
+		hoverText: "Building AI characters at Hallway",
 	},
 ];
 
@@ -125,7 +135,7 @@ export const PERSONAL_MODEL_CONFIGS: ModelConfig[] = [
 		glbPath: "/models/globe.glb",
 		scale: 2.5,
 		randomizeColor: false,
-		hoverText: "Traveled while working for 3 years",
+		hoverText: "Seasoned traveler",
 	},
 	{
 		id: "lionandsun",
