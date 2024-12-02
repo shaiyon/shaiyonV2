@@ -387,7 +387,7 @@ export const Model: React.FC<ModelProps> = ({
 				position={position}
 				rotation={rotation}
 				colliders={
-					config.id === "brain" || config.id === "guitar"
+					config.id === "brain"
 						? "cuboid"
 						: config.type === "obj"
 						? "hull"

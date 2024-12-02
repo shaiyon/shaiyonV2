@@ -91,10 +91,10 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		color: "#FF91AF",
 	},
 	{
-		id: "book",
+		id: "books",
 		type: "glb",
-		glbPath: "/models/book.glb",
-		scale: 0.45,
+		glbPath: "/models/books.glb",
+		scale: 0.85,
 		randomizeColor: false,
 		hoverText: "Education in Stats, Econ, & CS",
 	},
