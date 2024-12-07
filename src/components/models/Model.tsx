@@ -63,12 +63,44 @@ const ModelDescription = ({
 
 	useFrame(() => {
 		if (textRef.current && rigidBodyRef.current) {
-			const pos = rigidBodyRef.current.translation();
-			textRef.current.position.set(pos.x, pos.y + 1, pos.z);
+			const modelPos = rigidBodyRef.current.translation();
+			const modelPosition = new THREE.Vector3(
+				modelPos.x,
+				modelPos.y + 1,
+				modelPos.z
+			);
 
-			// Make text face camera every frame
+			// Calculate distance from camera to model
+			const cameraPosition = camera.position;
+			const distance = cameraPosition.distanceTo(modelPosition);
+
+			// Scale based on distance (you can adjust these values)
+			const minScale = 1; // Minimum scale when far
+			const maxScale = 2.5; // Maximum scale when close
+			const scale = THREE.MathUtils.clamp(
+				2 / distance, // Scale inversely with distance
+				minScale,
+				maxScale
+			);
+
+			// Calculate direction from object to camera
+			const directionToCamera = new THREE.Vector3()
+				.subVectors(cameraPosition, modelPosition)
+				.normalize();
+
+			// Offset position slightly towards camera (adjust 0.5 to change how far in front it appears)
+			const offsetPosition = modelPosition
+				.clone()
+				.add(directionToCamera.multiplyScalar(1));
+
+			// Update position and scale
+			textRef.current.position.copy(offsetPosition);
+			textRef.current.scale.setScalar(scale);
+
+			// Make text face camera
 			textRef.current.quaternion.copy(camera.quaternion);
 
+			// Handle fade out
 			if (!isDragging) {
 				const elapsedTime =
 					(Date.now() - fadeStartTimeRef.current) / 1000;

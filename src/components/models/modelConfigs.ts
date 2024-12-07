@@ -69,7 +69,7 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		depth: 150,
 		preserveColors: true,
 		randomizeColor: false,
-		hoverText: "Contribute to TypeScript codebaes",
+		hoverText: "Contribute to TypeScript codebases",
 	},
 	{
 		id: "docker",
