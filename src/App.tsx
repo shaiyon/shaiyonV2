@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Crosshair, HelpCircle } from "lucide-react";
+import { RefreshCw, Crosshair } from "lucide-react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
@@ -11,6 +11,7 @@ import { selectRandomTextures, type SelectedTextures } from "./textureTypes";
 import { PauseProvider } from "./contexts/PauseContext";
 import { CameraProvider, useCameraContext } from "./contexts/CameraContext";
 import { ModeLever } from "./components/ModeLever";
+import { HintPopups } from "./components/HintPopups";
 import { Scene } from "./components/Scene";
 
 interface ControlsProps {
@@ -167,6 +168,7 @@ export const App = () => {
 				controlsRef={controlsRef}
 				onTriggerTrapDoor={handleTriggerTrapDoor}
 			/>
+			<HintPopups />
 			<CameraProvider>
 				<PauseProvider isPaused={!isPageVisible}>
 					<AssetLoader

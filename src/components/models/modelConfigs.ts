@@ -98,16 +98,16 @@ export const WORK_MODEL_CONFIGS: ModelConfig[] = [
 		randomizeColor: false,
 		hoverText: "Education in Stats, Econ, & CS",
 	},
-	{
-		id: "hallway",
-		type: "svg",
-		svgPath: "/models/hallway.svg",
-		scale: 0.04,
-		depth: 10,
-		preserveColors: true,
-		randomizeColor: false,
-		hoverText: "Building AI characters at Hallway",
-	},
+	// {
+	// 	id: "hallway",
+	// 	type: "svg",
+	// 	svgPath: "/models/hallway.svg",
+	// 	scale: 0.04,
+	// 	depth: 10,
+	// 	preserveColors: true,
+	// 	randomizeColor: false,
+	// 	hoverText: "Building AI characters at Hallway",
+	// },
 ];
 
 export const PERSONAL_MODEL_CONFIGS: ModelConfig[] = [

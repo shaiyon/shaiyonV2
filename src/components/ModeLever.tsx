@@ -30,12 +30,12 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 							mode === "work" ? "text-white" : "text-blue-200"
 						}`}
 					>
-						<Laptop size={14} />
+						<Laptop size={20} />
 					</div>
 
 					{/* Lever Track */}
 					<div
-						className="relative w-3 h-8 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer"
+						className="relative w-4 h-12 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer"
 						onClick={handleClick}
 					>
 						{/* Track Groove */}
@@ -43,8 +43,8 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 
 						{/* Sliding Ball */}
 						<div
-							className={`absolute w-2.5 h-2.5 bg-red-500 rounded-full shadow-lg transition-all duration-300 ease-in-out 
-                ${mode === "work" ? "top-0.5" : "bottom-0.5"}`}
+							className={`absolute w-3.5 h-3.5 bg-red-500 rounded-full shadow-lg transition-all duration-300 ease-in-out 
+                ${mode === "work" ? "top-1" : "bottom-1"}`}
 						/>
 					</div>
 
@@ -54,7 +54,7 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 							mode === "personal" ? "text-white" : "text-blue-200"
 						}`}
 					>
-						<User size={14} />
+						<User size={20} />
 					</div>
 				</div>
 			</div>
