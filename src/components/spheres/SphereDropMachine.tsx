@@ -8,6 +8,7 @@ import { usePauseContext } from "../../contexts/PauseContext";
 
 const MAX_SPHERES = 75;
 const SPAWN_INTERVAL = 0.2 * 1000;
+const SPAWN_Y = 14;
 const Y_THRESHOLD = -20;
 
 interface Sphere {
@@ -126,7 +127,7 @@ export const SphereDropMachine: React.FC<SphereDropMachineProps> = ({
 				...prev,
 				{
 					id: Date.now(),
-					position: [randomX, 12, -1],
+					position: [randomX, SPAWN_Y, -1],
 					velocity: [0, -0.1, 0],
 				},
 			];

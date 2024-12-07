@@ -6,6 +6,7 @@ import { Model } from "./Model";
 import { WORK_MODEL_CONFIGS, PERSONAL_MODEL_CONFIGS } from "./modelConfigs";
 
 const SPAWN_INTERVAL = 1 * 1000;
+const SPAWN_Y = 14;
 const Y_THRESHOLD = -20;
 
 interface DropModel {
@@ -44,7 +45,7 @@ export const ModelDropMachine = ({
 		return {
 			id: Date.now() + Math.random(),
 			configId: config.id,
-			position: [Math.random() * 6 - 3, 10, Math.random() * 4 - 2],
+			position: [Math.random() * 6 - 3, SPAWN_Y, Math.random() * 4 - 2],
 			rotation: [
 				Math.random() * Math.PI,
 				Math.random() * Math.PI,
