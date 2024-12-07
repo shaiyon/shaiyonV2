@@ -19,7 +19,8 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 
 	return (
 		<div
-			className={`absolute ${isMobile ? "bottom" : "top"}-4 left-4 z-10`}
+			// className={`absolute ${isMobile ? "bottom" : "top"}-4 left-4 z-10`}
+			className={`absolute top-4 left-4 z-10`}
 		>
 			<div className="bg-blue-500 rounded-lg p-1.5 shadow-lg">
 				{/* Icons and Track */}
@@ -30,12 +31,12 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 							mode === "work" ? "text-white" : "text-blue-200"
 						}`}
 					>
-						<Laptop size={20} />
+						<Laptop size={18} />
 					</div>
 
 					{/* Lever Track */}
 					<div
-						className="relative w-4 h-12 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer"
+						className="relative w-2.5 h-10 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer"
 						onClick={handleClick}
 					>
 						{/* Track Groove */}
@@ -43,7 +44,7 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 
 						{/* Sliding Ball */}
 						<div
-							className={`absolute w-3.5 h-3.5 bg-red-500 rounded-full shadow-lg transition-all duration-300 ease-in-out 
+							className={`absolute w-3 h-3 bg-red-500 rounded-full shadow-lg transition-all duration-300 ease-in-out 
                 ${mode === "work" ? "top-1" : "bottom-1"}`}
 						/>
 					</div>
@@ -54,7 +55,7 @@ export const ModeLever: React.FC<ModeLeverProps> = ({ mode, onToggle }) => {
 							mode === "personal" ? "text-white" : "text-blue-200"
 						}`}
 					>
-						<User size={20} />
+						<User size={18} />
 					</div>
 				</div>
 			</div>

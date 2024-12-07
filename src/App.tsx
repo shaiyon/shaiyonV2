@@ -80,7 +80,8 @@ const ActionButtons = ({
 	return (
 		<div
 			className={`absolute ${
-				isMobile ? "bottom-4" : "top-4"
+				// isMobile ? "bottom-4" : "top-4"
+				"top-4"
 			} right-4 flex flex-col gap-2`}
 		>
 			<button
@@ -105,7 +106,7 @@ export const App = () => {
 	const controlsRef = useRef<OrbitControlsImpl>(null);
 	const { isMobile } = useDevice();
 
-	const defaultCameraPosition = isMobile ? [0, 4, 14] : [0, 2, 8];
+	const defaultCameraPosition = isMobile ? [0, 4, 16] : [0, 2, 10];
 	const [isPageVisible, setIsPageVisible] = useState(true);
 	const [selectedTextures] = useState<SelectedTextures>(
 		selectRandomTextures()
