@@ -10,7 +10,12 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
 
-import { RigidBody } from "@react-three/rapier";
+import {
+	RigidBody,
+	CapsuleCollider,
+	CuboidCollider,
+	CylinderCollider,
+} from "@react-three/rapier";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Text3D } from "@react-three/drei";
 
@@ -146,12 +151,14 @@ export const Model: React.FC<ModelProps> = ({
 	const { setIsEnabled: setCameraEnabled } = useCameraContext();
 	const { camera, raycaster, pointer } = useThree();
 	const [showDescription, setShowDescription] = useState(false);
+
 	const rigidBodyRef = useRef<typeof RigidBody>(null);
+	const [model, setModel] = useState<THREE.Object3D | null>(null);
 
 	const objLoader = useMemo(() => new OBJLoader(), []);
 	const svgLoader = useMemo(() => new SVGLoader(), []);
 	const gltfLoader = useMemo(() => new GLTFLoader(), []);
-	const [model, setModel] = useState<THREE.Object3D | null>(null);
+
 	const [error, setError] = useState<string | null>(null);
 
 	// Dragging state
@@ -418,13 +425,7 @@ export const Model: React.FC<ModelProps> = ({
 				ref={rigidBodyRef}
 				position={position}
 				rotation={rotation}
-				colliders={
-					config.id === "brain"
-						? "cuboid"
-						: config.type === "obj"
-						? "hull"
-						: "cuboid"
-				}
+				colliders={config.collider ?? "cuboid"} // Modified line
 				restitution={0.5}
 				friction={0.3}
 				linearDamping={0.01}

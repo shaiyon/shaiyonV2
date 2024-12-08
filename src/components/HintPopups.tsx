@@ -104,7 +104,7 @@ export const HintPopups = () => {
 	}
 
 	const grabText = `${isMobile ? "Tap" : "Click"} and hold to grab objects`;
-	const leverText = "Pull the lever!";
+	const leverText = "← Pull the lever 👀";
 
 	return (
 		<>

@@ -3,6 +3,7 @@ export interface BaseModelConfig {
 	scale: number;
 	randomizeColor?: boolean;
 	color?: string;
+	collider?: "cuboid" | "hull" | "ball";
 	hoverText?: string;
 }
 
