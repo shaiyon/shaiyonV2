@@ -10,12 +10,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import { Vector3, Matrix4, Euler, Plane } from "three";
 
-import {
-	RigidBody,
-	CapsuleCollider,
-	CuboidCollider,
-	CylinderCollider,
-} from "@react-three/rapier";
+import { RigidBody } from "@react-three/rapier";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Text3D } from "@react-three/drei";
 
@@ -425,13 +420,26 @@ export const Model: React.FC<ModelProps> = ({
 				ref={rigidBodyRef}
 				position={position}
 				rotation={rotation}
-				colliders={config.collider ?? "cuboid"} // Modified line
+				colliders={
+					config.collider !== "hull"
+						? config.collider ?? "cuboid"
+						: "cuboid"
+				}
+				// colliderOptions={
+				// 	config.collider === "hull"
+				// 		? {
+				// 				args: [],
+				// 				shape: "convexHull",
+				// 		  }
+				// 		: undefined
+				// }
 				restitution={0.5}
 				friction={0.3}
 				linearDamping={0.01}
 				angularDamping={0.01}
 				mass={0.1}
-				canSleep={false}
+				canSleep={true}
+				debug={true}
 			>
 				<group
 					onPointerDown={handlePointerDown}

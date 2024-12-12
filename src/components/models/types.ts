@@ -1,9 +1,12 @@
+import { RigidBodyAutoCollider } from "@react-three/rapier";
+
 export interface BaseModelConfig {
 	id: string;
 	scale: number;
 	randomizeColor?: boolean;
 	color?: string;
-	collider?: "cuboid" | "hull" | "ball";
+	collider?: RigidBodyAutoCollider;
+	hullApproximation?: number;
 	hoverText?: string;
 }
 
